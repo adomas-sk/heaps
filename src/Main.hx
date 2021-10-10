@@ -10,7 +10,7 @@ class Main extends hxd.App {
 
   override function init() {
     Window.getInstance().vsync = false;
-    block = new h2d.Bitmap(h2d.Tile.fromColor(0x000000, 100000, 100000, 1), s2d);
+    block = new h2d.Bitmap(h2d.Tile.fromColor(0x222222, 100000, 100000, 1), s2d);
     block.x = -500;
     block.y = -500;
 
@@ -27,7 +27,7 @@ class Main extends hxd.App {
     fpsText.text = "Hello World\nHeaps is great!";
     fpsText.textAlign = Center;
     fpsText.x = -s2d.width * 0.5 + 150;
-    fpsText.y = -s2d.height * 0.5 + 120;
+    fpsText.y = -s2d.height * 0.5 + 128;
   }
 
   override function update(dt:Float) {

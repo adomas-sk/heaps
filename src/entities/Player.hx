@@ -15,7 +15,7 @@ class Player {
     0 => "ED",
     25 => "SE",
   ];
-  var animations = [
+  var animations: haxe.ds.Map<String, haxe.ds.Map<String, Array<h2d.Tile>>> = [
     "SD" => [],
     "SW" => [],
     "WD" => [],
@@ -28,29 +28,41 @@ class Player {
   var camera: h2d.Camera;
   var direction = { x: 0, y: 0 };
   var rotation = 50;
+  var wasMoving = false;
   public var entity: Entity;
   public static inline var SPEED = 8.;
 
   public function new(scene: h2d.Scene) {
-    var charWalkTileImage = hxd.Res.char_walk.char_walk.toTile();
+    createAnimationTypes();
+    var charWalkTileImage = hxd.Res.player.walk.toTile();
+    var charIdleTileImage = hxd.Res.player.idle.toTile();
 
-    animations["SD"] = [for(x in 0 ... 15) charWalkTileImage.sub(x * 200, 0, 200, 200)];
-    animations["SW"] = [for(x in 0 ... 15) charWalkTileImage.sub(x * 200, 1 * 200, 200, 200)];
-    animations["WD"] = [for(x in 0 ... 15) charWalkTileImage.sub(x * 200, 2 * 200, 200, 200)];
-    animations["NW"] = [for(x in 0 ... 15) charWalkTileImage.sub(x * 200, 3 * 200, 200, 200)];
-    animations["ND"] = [for(x in 0 ... 15) charWalkTileImage.sub(x * 200, 4 * 200, 200, 200)];
-    animations["NE"] = [for(x in 0 ... 15) charWalkTileImage.sub(x * 200, 5 * 200, 200, 200)];
-    animations["ED"] = [for(x in 0 ... 15) charWalkTileImage.sub(x * 200, 6 * 200, 200, 200)];
-    animations["SE"] = [for(x in 0 ... 15) charWalkTileImage.sub(x * 200, 7 * 200, 200, 200)];
+    animations["SD"]["walk"] = [for(x in 0 ... 30) charWalkTileImage.sub(x * 256, 0, 256, 256)];
+    animations["SW"]["walk"] = [for(x in 0 ... 30) charWalkTileImage.sub(x * 256, 1 * 256, 256, 256)];
+    animations["WD"]["walk"] = [for(x in 0 ... 30) charWalkTileImage.sub(x * 256, 2 * 256, 256, 256)];
+    animations["NW"]["walk"] = [for(x in 0 ... 30) charWalkTileImage.sub(x * 256, 3 * 256, 256, 256)];
+    animations["ND"]["walk"] = [for(x in 0 ... 30) charWalkTileImage.sub(x * 256, 4 * 256, 256, 256)];
+    animations["NE"]["walk"] = [for(x in 0 ... 30) charWalkTileImage.sub(x * 256, 5 * 256, 256, 256)];
+    animations["ED"]["walk"] = [for(x in 0 ... 30) charWalkTileImage.sub(x * 256, 6 * 256, 256, 256)];
+    animations["SE"]["walk"] = [for(x in 0 ... 30) charWalkTileImage.sub(x * 256, 7 * 256, 256, 256)];
 
-    var anim = new h2d.Anim(animations["SD"], 24, scene);
+    animations["SD"]["idle"] = [for(x in 0 ... 30) charIdleTileImage.sub(x * 256, 0, 256, 256)];
+    animations["SW"]["idle"] = [for(x in 0 ... 30) charIdleTileImage.sub(x * 256, 1 * 256, 256, 256)];
+    animations["WD"]["idle"] = [for(x in 0 ... 30) charIdleTileImage.sub(x * 256, 2 * 256, 256, 256)];
+    animations["NW"]["idle"] = [for(x in 0 ... 30) charIdleTileImage.sub(x * 256, 3 * 256, 256, 256)];
+    animations["ND"]["idle"] = [for(x in 0 ... 30) charIdleTileImage.sub(x * 256, 4 * 256, 256, 256)];
+    animations["NE"]["idle"] = [for(x in 0 ... 30) charIdleTileImage.sub(x * 256, 5 * 256, 256, 256)];
+    animations["ED"]["idle"] = [for(x in 0 ... 30) charIdleTileImage.sub(x * 256, 6 * 256, 256, 256)];
+    animations["SE"]["idle"] = [for(x in 0 ... 30) charIdleTileImage.sub(x * 256, 7 * 256, 256, 256)];
+
+    var anim = new h2d.Anim(animations["SD"]["walk"], 24, scene);
     entity = new Entity(0, 0, anim);
     EntityManager.registerEntity("player", entity);
     entity.sprite = anim;
 
     var cameraFollow = new h2d.Object(anim);
-    cameraFollow.x = 100;
-    cameraFollow.y = 100;
+    cameraFollow.x = 128;
+    cameraFollow.y = 128;
 
     camera = new h2d.Camera(scene);
     camera.follow = cameraFollow;
@@ -104,9 +116,17 @@ class Player {
 
   function updateRotation() {
     var currentVelocity = new h3d.Vector(direction.x, direction.y);
-    var newRotation : haxe.Int32 = hxd.Math.ceil((hxd.Math.atan2(currentVelocity.y, currentVelocity.x) / hxd.Math.PI) * 100);
-    if (rotation != newRotation && currentVelocity.length() > 0.1) {
-      entity.sprite.play(animations[animationRotations[newRotation]]);
+    var newRotation : haxe.Int32 = hxd.Math.ceil(
+      (hxd.Math.atan2(currentVelocity.y, currentVelocity.x) / hxd.Math.PI) * 100
+    );
+    var isMoving = currentVelocity.length() > 0.1;
+    if (!isMoving) {
+      entity.sprite.play(animations[animationRotations[rotation]]["idle"]);
+      wasMoving = isMoving;
+      return;
+    }
+    if ((rotation != newRotation || wasMoving != isMoving) && currentVelocity.length() > 0.1) {
+      entity.sprite.play(animations[animationRotations[newRotation]]["walk"]);
       rotation = newRotation;
     }
   }
@@ -116,5 +136,21 @@ class Player {
     currentVelocity.normalize();
     currentVelocity.scale(SPEED);
     entity.setVelocity(currentVelocity.x, currentVelocity.y);
+  }
+
+  function createAnimationType() {
+    var animationEvents = [
+      "fire" => [],
+      "walk" => [],
+      "idle" => [],
+      "walk-fire" => [],
+    ];
+    return animationEvents;
+  }
+
+  function createAnimationTypes() {
+    for(rotation in animations) {
+      rotation = createAnimationType();
+    }
   }
 }
