@@ -1,9 +1,13 @@
 package common;
 
 class EntityManager {
-  static var entities: haxe.ds.Map<String, Entity> = [];
+  public static var entities: haxe.ds.Map<String, Entity> = [];
 
   public static function registerEntity(id: String, e: Entity) {
+    if (entities.exists(id)) {
+      throw "Entity exists: " + id;
+      return;
+    }
     entities[id] = e;
   }
 

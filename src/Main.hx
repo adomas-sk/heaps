@@ -1,3 +1,4 @@
+import common.Grid;
 import hxd.Window;
 import entities.Player;
 import common.EntityManager;
@@ -18,6 +19,15 @@ class Main extends hxd.App {
     bloc2.x = s2d.width * 0.5;
     bloc2.y = s2d.height * 0.5;
 
+    Grid.addObsticle(-1, 0, s2d);
+    Grid.addObsticle(0, 0, s2d);
+    Grid.addObsticle(1, 0, s2d);
+    Grid.addObsticle(2, 0, s2d);
+    Grid.addObsticle(3, 0, s2d);
+    Grid.addObsticle(4, 0, s2d);
+    Grid.addObsticle(5, 0, s2d);
+    Grid.addObsticle(6, 0, s2d);
+    Grid.addObsticle(7, 0, s2d);
     player = new Player(s2d);
 
     hxd.Window.getInstance().addEventTarget(InputManager.onEvent);
@@ -25,9 +35,8 @@ class Main extends hxd.App {
     var font : h2d.Font = hxd.res.DefaultFont.get();
     fpsText = new h2d.Text(font, player.entity.sprite);
     fpsText.text = "Hello World\nHeaps is great!";
-    fpsText.textAlign = Center;
-    fpsText.x = -s2d.width * 0.5 + 150;
-    fpsText.y = -s2d.height * 0.5 + 128;
+    fpsText.x = -s2d.width * 0.5 + 64;
+    fpsText.y = -s2d.height * 0.5 + 64;
   }
 
   override function update(dt:Float) {

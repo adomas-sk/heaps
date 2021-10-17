@@ -3,22 +3,29 @@ package common;
 class Entity {
   static public var CELL_SIZE = 16;
 
-  public var sprite : h2d.Anim;
+  public var sprite: h2d.Object;
 
-  public var cellX : Int;
-  public var cellY : Int;
-  public var cellRatioX : Float = 0.;
-  public var cellRatioY : Float = 0.;
+  public var cellX: Int;
+  public var cellY: Int;
+  public var cellRatioX: Float = 0.;
+  public var cellRatioY: Float = 0.;
 
-  public var x : Float;
-  public var y : Float;
+  public var x: Float;
+  public var y: Float;
 
-  public var velocityX : Float = 0;
-  public var velocityY : Float = 0;
+  public var velocityX: Float = 0;
+  public var velocityY: Float = 0;
 
-  var onUpdate: (dt: Float) -> Void;
+  public var spriteOffset = {x: 0, y: 0};
 
-  public function new(cellXInit, cellYInit, spriteInit) {
+  public var staticEntity: Bool = false;
+
+  var onUpdate: (dt: Float) -> Void = (dt) -> return;
+
+  public function new(id: String,cellXInit, cellYInit, spriteInit, ?isStatic: Bool) {
+    if (isStatic) {
+      staticEntity = isStatic;
+    }
     sprite = spriteInit;
 
     cellX = cellXInit;
@@ -26,6 +33,8 @@ class Entity {
 
     x = Std.int((cellX + cellRatioX) * CELL_SIZE);
     y = Std.int((cellY + cellRatioY) * CELL_SIZE);
+
+    EntityManager.registerEntity(id, this);
   }
 
   public function setVelocity(newVelX, newVelY) {
@@ -34,13 +43,14 @@ class Entity {
   }
 
   public function calculationUpdate(dt: Float) {
+    if (staticEntity) return;
     cellRatioX += velocityX * dt;
     velocityX *= 0.96;
-    if(hasCollision(cellX+1,cellY) && cellRatioX>=0.7 ) {
+    if(cellRatioX >= 0.7 && hasCollision(cellX+1,cellY)) {
       cellRatioX = 0.7;
       velocityX = 0;
     }
-    if(hasCollision(cellX-1,cellY) && cellRatioX<=0.3 ) {
+    if(cellRatioX <= 0.3 && hasCollision(cellX-1,cellY)) {
       cellRatioX = 0.3;
       velocityX = 0;
     }
@@ -55,11 +65,11 @@ class Entity {
 
     cellRatioY += velocityY * dt;
     velocityY *= 0.96;
-    if(hasCollision(cellY+1,cellY) && cellRatioY>=0.7 ) {
+    if(cellRatioY >= 0.7 && hasCollision(cellX, cellY + 1)) {
       cellRatioY = 0.7;
       velocityY = 0;
     }
-    if(hasCollision(cellY-1,cellY) && cellRatioY<=0.3 ) {
+    if(cellRatioY <= 0.3 && hasCollision(cellX, cellY - 1)) {
       cellRatioY = 0.3;
       velocityY = 0;
     }
@@ -79,11 +89,21 @@ class Entity {
   public function update(dt: Float) {
     onUpdate(dt);
 
-    sprite.x = x;
-    sprite.y = y;
+    if (staticEntity) return;
+
+    sprite.x = x + spriteOffset.x;
+    sprite.y = y + spriteOffset.y;
   }
 
   public function hasCollision(xToCheck: Int, yToCheck: Int) {
+    if (Grid.isWallAt(xToCheck, yToCheck)) {
+      return true;
+    }
+    for (entity in EntityManager.entities) {
+      if (entity.cellX == xToCheck && entity.cellY == yToCheck) {
+        return true;
+      }
+    }
     return false;
   }
 
