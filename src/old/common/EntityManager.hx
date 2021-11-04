@@ -1,4 +1,4 @@
-package common;
+package old.common;
 
 class EntityManager {
   public static var entities: haxe.ds.Map<String, Entity> = [];

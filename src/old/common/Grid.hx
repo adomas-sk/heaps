@@ -1,4 +1,4 @@
-package common;
+package old.common;
 
 class Grid {
   public static var walls: haxe.ds.Map<String, h2d.Bitmap> = [];

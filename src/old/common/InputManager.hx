@@ -1,4 +1,4 @@
-package common;
+package old.common;
 
 enum InputName {
   w;

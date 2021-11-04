@@ -1,13 +1,13 @@
-package entities;
+package old.entities;
 
-import common.Entity;
+import old.common.Entity;
 
 class Bullet {
   static var bulletCount = 0;
   var scene: h2d.Scene;
   var entity: Entity;
 
-  public static inline var SPEED = 16.;
+  public static inline var SPEED = 32.;
 
   public function new(startX: Int, startY: Int, directionX: Float, directionY: Float, initScene: h2d.Scene) {
     bulletCount += 1;

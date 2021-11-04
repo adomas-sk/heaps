@@ -1,7 +1,8 @@
-package common;
+package old.common;
 
 class Entity {
   static public var CELL_SIZE = 16;
+  static inline var FRICTION = 0.005;
 
   public var sprite: h2d.Object;
 
@@ -45,7 +46,9 @@ class Entity {
   public function calculationUpdate(dt: Float) {
     if (staticEntity) return;
     cellRatioX += velocityX * dt;
-    velocityX *= 0.96;
+    if (Math.abs(velocityX) > 0.000005) {
+      velocityX *= Math.pow(FRICTION, dt);
+    }
     if(cellRatioX >= 0.7 && hasCollision(cellX+1,cellY)) {
       cellRatioX = 0.7;
       velocityX = 0;
@@ -64,7 +67,9 @@ class Entity {
     }
 
     cellRatioY += velocityY * dt;
-    velocityY *= 0.96;
+    if (Math.abs(velocityY) > 0.005) {
+      velocityY *= Math.pow(FRICTION, dt);
+    }
     if(cellRatioY >= 0.7 && hasCollision(cellX, cellY + 1)) {
       cellRatioY = 0.7;
       velocityY = 0;

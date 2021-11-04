@@ -1,49 +1,78 @@
-import common.Grid;
-import hxd.Window;
-import entities.Player;
-import common.EntityManager;
-import common.InputManager;
+import entities.Nest;
+import entities.ResourceBundle;
+import hxd.Math;
+import h2d.Bitmap;
 
 class Main extends hxd.App {
+  static inline var BLOCK_SIZE = 32;
+
+  public static var scene: h2d.Scene;
+
   var fpsText : h2d.Text;
-  var player : Player;
-  var block : h2d.Bitmap;
+
+  var mouse: Bitmap;
+  var square: Bitmap;
+
+  var resourceBundles: Array<ResourceBundle> = [];
+  var nests: Array<Nest> = [];
 
   override function init() {
-    Window.getInstance().vsync = false;
-    block = new h2d.Bitmap(h2d.Tile.fromColor(0x222222, 100000, 100000, 1), s2d);
-    block.x = -500;
-    block.y = -500;
+    // Window.getInstance().vsync = false;
+    hxd.Window.getInstance().addEventTarget(moveMouse);
+    scene = s2d;
+    
+    var background = new Bitmap(h2d.Tile.fromColor(0x666666, 1000, 1000, 1), s2d);
 
-    var bloc2 = new h2d.Bitmap(h2d.Tile.fromColor(0x449999, 50, 50, 1), s2d);
-    bloc2.x = s2d.width * 0.5;
-    bloc2.y = s2d.height * 0.5;
+    // RESOURCE
+    resourceBundles.push(new ResourceBundle(400, 350, 50, 12, s2d));
+    resourceBundles.push(new ResourceBundle(500, 500, 50, 8, s2d));
 
-    Grid.addObsticle(-1, 0, s2d);
-    Grid.addObsticle(0, 0, s2d);
-    Grid.addObsticle(1, 0, s2d);
-    Grid.addObsticle(2, 0, s2d);
-    Grid.addObsticle(3, 0, s2d);
-    Grid.addObsticle(4, 0, s2d);
-    Grid.addObsticle(5, 0, s2d);
-    Grid.addObsticle(6, 0, s2d);
-    Grid.addObsticle(7, 0, s2d);
-    player = new Player(s2d);
+    // NEST
+    // nests.push(new Nest(100, 100));
 
-    hxd.Window.getInstance().addEventTarget(InputManager.onEvent);
+    // CONTROL
+    square = new Bitmap(h2d.Tile.fromColor(0x00FF00, BLOCK_SIZE, BLOCK_SIZE, 0.4), s2d);
+    var interaction = new h2d.Interactive(BLOCK_SIZE, BLOCK_SIZE, square);
+    interaction.onPush = function(event : hxd.Event) {
+      square.alpha = 0.7;
+    }
+    interaction.onRelease = function(event : hxd.Event) {
+      square.alpha = 1;
+    }
+    interaction.onClick = function(event : hxd.Event) {
+      nests.push(new Nest(square.x + BLOCK_SIZE / 2, square.y + BLOCK_SIZE / 2));
+      trace("click!");
+    }
+    mouse = new Bitmap(h2d.Tile.fromColor(0xFF0000, 4, 4, 1), s2d);
 
+    // FPS
     var font : h2d.Font = hxd.res.DefaultFont.get();
-    fpsText = new h2d.Text(font, player.entity.sprite);
-    fpsText.text = "Hello World\nHeaps is great!";
-    fpsText.x = -s2d.width * 0.5 + 64;
-    fpsText.y = -s2d.height * 0.5 + 64;
+    fpsText = new h2d.Text(font, s2d);
+    fpsText.text = "";
+    fpsText.x = 0;
+    fpsText.y = 0;
+  }
+
+  function moveMouse(event : hxd.Event) {
+    switch(event.kind) {
+      case EMove: {
+        mouse.x = event.relX - 2;
+        mouse.y = event.relY - 2;
+
+        square.x = Math.floor(mouse.x / BLOCK_SIZE) * BLOCK_SIZE;
+        square.y = Math.floor(mouse.y / BLOCK_SIZE) * BLOCK_SIZE;
+      }
+      case _:
+    }
   }
 
   override function update(dt:Float) {
     var fps = Std.int(hxd.Timer.fps());
     fpsText.text = '$fps';
-    EntityManager.calculationUpdate(dt);
-    EntityManager.update(dt);
+
+    for(nest in nests) {
+      nest.update(dt);
+    }
   }
 
   static function main() {

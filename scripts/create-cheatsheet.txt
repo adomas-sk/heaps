@@ -1,8 +1,8 @@
 Walk
-python3 scripts/create-spritesheet.py /tmp 1 240 30 walk
+python3 scripts/create-spritesheet.py /tmp 1 120 15 128 walk
 Idle
-python3 scripts/create-spritesheet.py /tmp 1 240 30 idle
+python3 scripts/create-spritesheet.py /tmp 1 120 15 128 idle
 Fire
-python3 scripts/create-spritesheet.py /tmp 1 56 7 fire
+python3 scripts/create-spritesheet.py /tmp 1 40 5 128 fire
 Fire-Walk
-python3 scripts/create-spritesheet.py /tmp 537 776 30 walk-fire
+python3 scripts/create-spritesheet.py /tmp 537 776 30 128 walk-fire

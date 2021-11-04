@@ -19,12 +19,12 @@ dest = "/Users/adomass/Documents/Projects/haxe/res/player/"
 def main(args):
   if (len(args) < 5):
     raise("MISSING ARGS")
-  spriteSize = 128
   path = args[1]
   start = int(args[2])
   end = int(args[3])
   cols = int(args[4])
-  name = args[5]
+  spriteSize = int(args[5])
+  name = args[6]
   imageCount = end - start + 1
   
   print(imageCount)
@@ -38,7 +38,7 @@ def main(args):
     row = math.floor(i / cols)
     col = i % cols
     spriteSheet.paste(image, (col * spriteSize, row * spriteSize))
-  spriteSheet.show()
+  # spriteSheet.show()
   if name:
     spriteSheet.save(dest+ name + '.png',"png")
   else:

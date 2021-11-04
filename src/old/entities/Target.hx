@@ -1,4 +1,4 @@
-package entities;
+package old.entities;
 
 class Target {
   var scene: h2d.Scene;

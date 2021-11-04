@@ -1,8 +1,7 @@
-package entities;
+package old.entities;
 
-import common.Entity;
-import common.InputManager;
-import common.EntityManager;
+import old.common.Entity;
+import old.common.InputManager;
 
 class Player {
   var animationRotations = [
@@ -41,14 +40,14 @@ class Player {
     scene = initScene;
     loadAnimations();
 
-    animation = new h2d.Anim(animations["SD"]["walk"], 24, scene);
+    animation = new h2d.Anim(animations["SD"]["walk"], 12, scene);
     animation.onAnimEnd = () -> {
       if (shooting) {
         new Bullet(entity.cellX, entity.cellY, InputManager.mousePosition.x, InputManager.mousePosition.y, scene);
       }
     };
     entity = new Entity("player", 0, 0, animation);
-    entity.spriteOffset = {x: -64, y: -100};
+    entity.spriteOffset = {x: Std.int(-(SPRITE_SIZE / 2)), y: Std.int(-(SPRITE_SIZE * 0.75))};
     entity.sprite = animation;
 
     var cameraFollow = new h2d.Object(animation);
@@ -118,7 +117,10 @@ class Player {
       var currentVelocity = new h3d.Vector(direction.x, direction.y);
       currentVelocity.normalize();
       currentVelocity.scale(SPEED);
-      entity.setVelocity(currentVelocity.x, currentVelocity.y);
+      if (currentVelocity.length() > 0.5) {
+        // trace(currentVelocity.length());
+        entity.setVelocity(currentVelocity.x, currentVelocity.y);
+      }
     }
   }
 
@@ -155,6 +157,11 @@ class Player {
     yText.x = -scene.width * 0.5 + 64;
     yText.y = -scene.height * 0.5 + 190;
 
+    var velocity = new h2d.Text(font, entity.sprite);
+    velocity.text = "Player velocity: x - " + entity.velocityX + " y - " + entity.velocityY;
+    velocity.x = -scene.width * 0.5 + 64;
+    velocity.y = -scene.height * 0.5 + 210;
+
     var tile = h2d.Tile.fromColor(0xFF0000, 4, 4, 1);
     var bmp = new h2d.Bitmap(tile, scene);
 
@@ -165,6 +172,7 @@ class Player {
       cellRatioYText.text = "Player RatioY: " + entity.cellRatioY;
       xText.text = "Player X: " + entity.x;
       yText.text = "Player Y: " + entity.y;
+      velocity.text = "Player velocity: x = " + entity.velocityX + "; y = " + entity.velocityY;
       bmp.x = entity.x;
       bmp.y = entity.y;
       onUpdate(dt);
@@ -194,32 +202,35 @@ class Player {
     var charFireTileImage = hxd.Res.player.fire.toTile();
     
     {
-      animations["SD"]["walk"] = [for(x in 0 ... 30) charWalkTileImage.sub(x * SPRITE_SIZE, 0, SPRITE_SIZE, SPRITE_SIZE)];
-      animations["SW"]["walk"] = [for(x in 0 ... 30) charWalkTileImage.sub(x * SPRITE_SIZE, 1 * SPRITE_SIZE, SPRITE_SIZE, SPRITE_SIZE)];
-      animations["WD"]["walk"] = [for(x in 0 ... 30) charWalkTileImage.sub(x * SPRITE_SIZE, 2 * SPRITE_SIZE, SPRITE_SIZE, SPRITE_SIZE)];
-      animations["NW"]["walk"] = [for(x in 0 ... 30) charWalkTileImage.sub(x * SPRITE_SIZE, 3 * SPRITE_SIZE, SPRITE_SIZE, SPRITE_SIZE)];
-      animations["ND"]["walk"] = [for(x in 0 ... 30) charWalkTileImage.sub(x * SPRITE_SIZE, 4 * SPRITE_SIZE, SPRITE_SIZE, SPRITE_SIZE)];
-      animations["NE"]["walk"] = [for(x in 0 ... 30) charWalkTileImage.sub(x * SPRITE_SIZE, 5 * SPRITE_SIZE, SPRITE_SIZE, SPRITE_SIZE)];
-      animations["ED"]["walk"] = [for(x in 0 ... 30) charWalkTileImage.sub(x * SPRITE_SIZE, 6 * SPRITE_SIZE, SPRITE_SIZE, SPRITE_SIZE)];
-      animations["SE"]["walk"] = [for(x in 0 ... 30) charWalkTileImage.sub(x * SPRITE_SIZE, 7 * SPRITE_SIZE, SPRITE_SIZE, SPRITE_SIZE)];
+      animations["SD"]["walk"] = [for(x in 0 ... 15) charWalkTileImage.sub(x * SPRITE_SIZE, 0, SPRITE_SIZE, SPRITE_SIZE)];
+      // for(i in animations["SD"]["walk"]) {
+      //   i.scaleToSize(SPRITE_SIZE*2, SPRITE_SIZE*2);
+      // }
+      animations["SW"]["walk"] = [for(x in 0 ... 15) charWalkTileImage.sub(x * SPRITE_SIZE, 1 * SPRITE_SIZE, SPRITE_SIZE, SPRITE_SIZE)];
+      animations["WD"]["walk"] = [for(x in 0 ... 15) charWalkTileImage.sub(x * SPRITE_SIZE, 2 * SPRITE_SIZE, SPRITE_SIZE, SPRITE_SIZE)];
+      animations["NW"]["walk"] = [for(x in 0 ... 15) charWalkTileImage.sub(x * SPRITE_SIZE, 3 * SPRITE_SIZE, SPRITE_SIZE, SPRITE_SIZE)];
+      animations["ND"]["walk"] = [for(x in 0 ... 15) charWalkTileImage.sub(x * SPRITE_SIZE, 4 * SPRITE_SIZE, SPRITE_SIZE, SPRITE_SIZE)];
+      animations["NE"]["walk"] = [for(x in 0 ... 15) charWalkTileImage.sub(x * SPRITE_SIZE, 5 * SPRITE_SIZE, SPRITE_SIZE, SPRITE_SIZE)];
+      animations["ED"]["walk"] = [for(x in 0 ... 15) charWalkTileImage.sub(x * SPRITE_SIZE, 6 * SPRITE_SIZE, SPRITE_SIZE, SPRITE_SIZE)];
+      animations["SE"]["walk"] = [for(x in 0 ... 15) charWalkTileImage.sub(x * SPRITE_SIZE, 7 * SPRITE_SIZE, SPRITE_SIZE, SPRITE_SIZE)];
   
-      animations["SD"]["idle"] = [for(x in 0 ... 30) charIdleTileImage.sub(x * SPRITE_SIZE, 0, SPRITE_SIZE, SPRITE_SIZE)];
-      animations["SW"]["idle"] = [for(x in 0 ... 30) charIdleTileImage.sub(x * SPRITE_SIZE, 1 * SPRITE_SIZE, SPRITE_SIZE, SPRITE_SIZE)];
-      animations["WD"]["idle"] = [for(x in 0 ... 30) charIdleTileImage.sub(x * SPRITE_SIZE, 2 * SPRITE_SIZE, SPRITE_SIZE, SPRITE_SIZE)];
-      animations["NW"]["idle"] = [for(x in 0 ... 30) charIdleTileImage.sub(x * SPRITE_SIZE, 3 * SPRITE_SIZE, SPRITE_SIZE, SPRITE_SIZE)];
-      animations["ND"]["idle"] = [for(x in 0 ... 30) charIdleTileImage.sub(x * SPRITE_SIZE, 4 * SPRITE_SIZE, SPRITE_SIZE, SPRITE_SIZE)];
-      animations["NE"]["idle"] = [for(x in 0 ... 30) charIdleTileImage.sub(x * SPRITE_SIZE, 5 * SPRITE_SIZE, SPRITE_SIZE, SPRITE_SIZE)];
-      animations["ED"]["idle"] = [for(x in 0 ... 30) charIdleTileImage.sub(x * SPRITE_SIZE, 6 * SPRITE_SIZE, SPRITE_SIZE, SPRITE_SIZE)];
-      animations["SE"]["idle"] = [for(x in 0 ... 30) charIdleTileImage.sub(x * SPRITE_SIZE, 7 * SPRITE_SIZE, SPRITE_SIZE, SPRITE_SIZE)];
+      animations["SD"]["idle"] = [for(x in 0 ... 15) charIdleTileImage.sub(x * SPRITE_SIZE, 0, SPRITE_SIZE, SPRITE_SIZE)];
+      animations["SW"]["idle"] = [for(x in 0 ... 15) charIdleTileImage.sub(x * SPRITE_SIZE, 1 * SPRITE_SIZE, SPRITE_SIZE, SPRITE_SIZE)];
+      animations["WD"]["idle"] = [for(x in 0 ... 15) charIdleTileImage.sub(x * SPRITE_SIZE, 2 * SPRITE_SIZE, SPRITE_SIZE, SPRITE_SIZE)];
+      animations["NW"]["idle"] = [for(x in 0 ... 15) charIdleTileImage.sub(x * SPRITE_SIZE, 3 * SPRITE_SIZE, SPRITE_SIZE, SPRITE_SIZE)];
+      animations["ND"]["idle"] = [for(x in 0 ... 15) charIdleTileImage.sub(x * SPRITE_SIZE, 4 * SPRITE_SIZE, SPRITE_SIZE, SPRITE_SIZE)];
+      animations["NE"]["idle"] = [for(x in 0 ... 15) charIdleTileImage.sub(x * SPRITE_SIZE, 5 * SPRITE_SIZE, SPRITE_SIZE, SPRITE_SIZE)];
+      animations["ED"]["idle"] = [for(x in 0 ... 15) charIdleTileImage.sub(x * SPRITE_SIZE, 6 * SPRITE_SIZE, SPRITE_SIZE, SPRITE_SIZE)];
+      animations["SE"]["idle"] = [for(x in 0 ... 15) charIdleTileImage.sub(x * SPRITE_SIZE, 7 * SPRITE_SIZE, SPRITE_SIZE, SPRITE_SIZE)];
   
-      animations["SD"]["fire"] = [for(x in 0 ... 7) charFireTileImage.sub(x * SPRITE_SIZE, 0, SPRITE_SIZE, SPRITE_SIZE)];
-      animations["SW"]["fire"] = [for(x in 0 ... 7) charFireTileImage.sub(x * SPRITE_SIZE, 1 * SPRITE_SIZE, SPRITE_SIZE, SPRITE_SIZE)];
-      animations["WD"]["fire"] = [for(x in 0 ... 7) charFireTileImage.sub(x * SPRITE_SIZE, 2 * SPRITE_SIZE, SPRITE_SIZE, SPRITE_SIZE)];
-      animations["NW"]["fire"] = [for(x in 0 ... 7) charFireTileImage.sub(x * SPRITE_SIZE, 3 * SPRITE_SIZE, SPRITE_SIZE, SPRITE_SIZE)];
-      animations["ND"]["fire"] = [for(x in 0 ... 7) charFireTileImage.sub(x * SPRITE_SIZE, 4 * SPRITE_SIZE, SPRITE_SIZE, SPRITE_SIZE)];
-      animations["NE"]["fire"] = [for(x in 0 ... 7) charFireTileImage.sub(x * SPRITE_SIZE, 5 * SPRITE_SIZE, SPRITE_SIZE, SPRITE_SIZE)];
-      animations["ED"]["fire"] = [for(x in 0 ... 7) charFireTileImage.sub(x * SPRITE_SIZE, 6 * SPRITE_SIZE, SPRITE_SIZE, SPRITE_SIZE)];
-      animations["SE"]["fire"] = [for(x in 0 ... 7) charFireTileImage.sub(x * SPRITE_SIZE, 7 * SPRITE_SIZE, SPRITE_SIZE, SPRITE_SIZE)];
+      animations["SD"]["fire"] = [for(x in 0 ... 5) charFireTileImage.sub(x * SPRITE_SIZE, 0, SPRITE_SIZE, SPRITE_SIZE)];
+      animations["SW"]["fire"] = [for(x in 0 ... 5) charFireTileImage.sub(x * SPRITE_SIZE, 1 * SPRITE_SIZE, SPRITE_SIZE, SPRITE_SIZE)];
+      animations["WD"]["fire"] = [for(x in 0 ... 5) charFireTileImage.sub(x * SPRITE_SIZE, 2 * SPRITE_SIZE, SPRITE_SIZE, SPRITE_SIZE)];
+      animations["NW"]["fire"] = [for(x in 0 ... 5) charFireTileImage.sub(x * SPRITE_SIZE, 3 * SPRITE_SIZE, SPRITE_SIZE, SPRITE_SIZE)];
+      animations["ND"]["fire"] = [for(x in 0 ... 5) charFireTileImage.sub(x * SPRITE_SIZE, 4 * SPRITE_SIZE, SPRITE_SIZE, SPRITE_SIZE)];
+      animations["NE"]["fire"] = [for(x in 0 ... 5) charFireTileImage.sub(x * SPRITE_SIZE, 5 * SPRITE_SIZE, SPRITE_SIZE, SPRITE_SIZE)];
+      animations["ED"]["fire"] = [for(x in 0 ... 5) charFireTileImage.sub(x * SPRITE_SIZE, 6 * SPRITE_SIZE, SPRITE_SIZE, SPRITE_SIZE)];
+      animations["SE"]["fire"] = [for(x in 0 ... 5) charFireTileImage.sub(x * SPRITE_SIZE, 7 * SPRITE_SIZE, SPRITE_SIZE, SPRITE_SIZE)];
     }
   }
 
