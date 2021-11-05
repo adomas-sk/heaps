@@ -1,4 +1,3 @@
-import h2d.Camera;
 import h2d.Object;
 import entities.Nest;
 import entities.ResourceBundle;

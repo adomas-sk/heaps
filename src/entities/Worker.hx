@@ -144,7 +144,7 @@ class Worker {
   }
 
   function goingTowardResourceBundle(dt: Float) {
-    if (destination.distance(position) < destinationResourceBundle.size + 10) {
+    if (destinationResourceBundle != null && destination.distance(position) < destinationResourceBundle.size + 10) {
       // GETTING CLOSE TO RESOURCE BUNDLE
       var closestDestination = getDestinationToClosestResource();
       if (closestDestination == null) {
