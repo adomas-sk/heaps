@@ -44,7 +44,6 @@ class Entity {
   }
 
   public function calculationUpdate(dt: Float) {
-    if (staticEntity) return;
     cellRatioX += velocityX * dt;
     if (Math.abs(velocityX) > 0.000005) {
       velocityX *= Math.pow(FRICTION, dt);
@@ -93,8 +92,6 @@ class Entity {
 
   public function update(dt: Float) {
     onUpdate(dt);
-
-    if (staticEntity) return;
 
     sprite.x = x + spriteOffset.x;
     sprite.y = y + spriteOffset.y;

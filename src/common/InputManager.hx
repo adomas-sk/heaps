@@ -1,4 +1,4 @@
-package old.common;
+package common;
 
 enum InputName {
   w;
@@ -35,7 +35,7 @@ class InputManager {
     InputName.s => [],
     InputName.d => [],
   ];
-  static var changeEventHandlers: haxe.ds.Map<InputName, haxe.ds.Map<String, () -> Void>> = [
+  static var changeEventHandlers: haxe.ds.Map<InputName, haxe.ds.Map<String, (event: hxd.Event) -> Void>> = [
     InputName.mouseMove => [],
   ];
   public static var keysPressed = [
@@ -54,7 +54,7 @@ class InputManager {
         mousePosition.x = event.relX;
         mousePosition.y = event.relY;
         for (handler in changeEventHandlers[InputName.mouseMove]) {
-          handler();
+          handler(event);
         }
       }
       case EPush: {
@@ -105,7 +105,7 @@ class InputManager {
     keysUpEventHandlers[key][id] = eventHandler;
   }
 
-  public static function registerChangeEventHandler(id: String, key: InputName, eventHandler: () -> Void) {
+  public static function registerChangeEventHandler(id: String, key: InputName, eventHandler: (event: hxd.Event) -> Void) {
     changeEventHandlers[key][id] = eventHandler;
   }
 }
