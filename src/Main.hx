@@ -1,10 +1,8 @@
+import common.GroundRenderer;
 import entities.Drone;
 import common.InputManager;
 import h3d.Vector;
 import entities.Girl;
-import h2d.Object;
-import entities.Nest;
-import entities.ResourceBundle;
 import h2d.Bitmap;
 
 class Main extends hxd.App {
@@ -12,34 +10,25 @@ class Main extends hxd.App {
 
   public static var scene: h2d.Scene;
 
+  var devMode = false;
+  var dragging = false;
+  var tileName = GroundTiles.GRASS1;
+  var draggedMouseThrough = [];
+
   var fpsText : h2d.Text;
 
-  var mouse: Bitmap;
   var square: Bitmap;
-
-  var resourceBundles: Array<ResourceBundle> = [];
-  var nests: Array<Nest> = [];
-
-  var cameraFollow: Object;
-  var movingCamera = false;
-  var lastMousePos = {x: 0., y: 0.};
 
   var drones: Array<Drone> = [];
   var girl: Girl;
-  var input = [
-    87 => 'w',
-    83 => 's',
-    65 => 'a',
-    68 => 'd',
-  ];
 
   override function init() {
     // Window.getInstance().vsync = false;
     hxd.Window.getInstance().addEventTarget(InputManager.onEvent);
     scene = s2d;
-    
-    // BACKGROUND
-    new Bitmap(h2d.Tile.fromColor(0x666666, 1000, 1000, 1), s2d);
+
+    // GROUND
+    GroundRenderer.renderGround();
 
     // GIRL
     girl = new Girl(0, 0);
@@ -54,15 +43,56 @@ class Main extends hxd.App {
 
     // CONTROL
     square = new Bitmap(h2d.Tile.fromColor(0x0099FF, BLOCK_SIZE, BLOCK_SIZE, 0.4), s2d);
-    mouse = new Bitmap(h2d.Tile.fromColor(0xFF0000, 4, 4, 1), s2d);
     InputManager.registerChangeEventHandler("building-square", InputName.mouseMove, (event: hxd.Event) -> {
-      mouse.x = s2d.interactiveCamera.x - s2d.width / 2 + event.relX - 2;
-      mouse.y = s2d.interactiveCamera.y - s2d.height / 2 + event.relY - 2;
+      var mouseX = s2d.interactiveCamera.x - s2d.width / 2 + event.relX - 2;
+      var mouseY = s2d.interactiveCamera.y - s2d.height / 2 + event.relY - 2;
 
-      square.x = Math.floor(mouse.x / BLOCK_SIZE) * BLOCK_SIZE;
-      square.y = Math.floor(mouse.y / BLOCK_SIZE) * BLOCK_SIZE;
+      square.x = Math.floor(mouseX / BLOCK_SIZE) * BLOCK_SIZE;
+      square.y = Math.floor(mouseY / BLOCK_SIZE) * BLOCK_SIZE;
+    });
 
-      lastMousePos = {x: event.relX, y: event.relY};
+    // DEVMODE
+    InputManager.registerEventHandler("devmode", InputName.bslash, (repeat: Bool) -> {
+      devMode = true;
+      InputManager.registerEventHandler("devmode", InputName.num1, (repeat: Bool) -> {
+        tileName = GroundTiles.GRASS1;
+      });
+      InputManager.registerEventHandler("devmode", InputName.num2, (repeat: Bool) -> {
+        tileName = GroundTiles.GRASS2;
+      });
+      InputManager.registerEventHandler("devmode", InputName.num3, (repeat: Bool) -> {
+        tileName = GroundTiles.GRASS3;
+      });
+      InputManager.registerEventHandler("devmode", InputName.num4, (repeat: Bool) -> {
+        tileName = GroundTiles.ROADL;
+      });
+      InputManager.registerEventHandler("devmode", InputName.num5, (repeat: Bool) -> {
+        tileName = GroundTiles.ROADLB;
+      });
+      InputManager.registerEventHandler("devmode", InputName.num6, (repeat: Bool) -> {
+        tileName = GroundTiles.ROAD;
+      });
+      InputManager.registerEventHandler("devmode", InputName.mouseL, (repeat: Bool) -> {
+        if (!repeat) {
+          var newCell = square.x + ":" + square.y;
+          draggedMouseThrough.push(newCell);
+          GroundRenderer.addTile(square.x, square.y, tileName);
+          dragging = true;
+        }
+      });
+      InputManager.registerReleaseEventHandler("devmode", InputName.mouseL, () -> {
+        dragging = false;
+      });
+      InputManager.registerChangeEventHandler("devmode", InputName.mouseMove, (event: hxd.Event) -> {
+        if (dragging) {
+          var newCell = square.x + ":" + square.y;
+          if (draggedMouseThrough.contains(newCell)) {
+            return;
+          }
+          draggedMouseThrough.push(newCell);
+          GroundRenderer.addTile(square.x, square.y, tileName);
+        }
+      });
     });
 
     var interaction = new h2d.Interactive(BLOCK_SIZE, BLOCK_SIZE, square);
@@ -70,19 +100,24 @@ class Main extends hxd.App {
       square.alpha = 0.7;
     }
     interaction.onRelease = function(event : hxd.Event) {
+      draggedMouseThrough = [];
       square.alpha = 1;
     }
     interaction.onClick = function(event : hxd.Event) {
+      if (devMode) {
+        return;
+      }
       var newBuildingX = square.x + BLOCK_SIZE / 2;
       var newBuildingY = square.y + BLOCK_SIZE / 2;
-      drones[0].orderDelivery(new Vector(newBuildingX, newBuildingY), () -> {
+      var addTile = () -> {
         var tile = h2d.Tile.fromColor(0x3d3322, BLOCK_SIZE, BLOCK_SIZE, 1);
         tile.dx -= BLOCK_SIZE / 2;
         tile.dy -= BLOCK_SIZE / 2;
         var building = new Bitmap(tile, s2d);
         building.x = newBuildingX;
         building.y = newBuildingY;
-      });
+      };
+      drones[0].orderDelivery(new Vector(newBuildingX, newBuildingY), addTile);
     }
 
     // FPS
@@ -94,13 +129,15 @@ class Main extends hxd.App {
   }
 
   override function update(dt:Float) {
-    var fps = Std.int(hxd.Timer.fps());
-    fpsText.text = '$fps';
-
     for(drone in drones) {
       drone.update(dt);
     }
     girl.update(dt);
+    
+    var fps = Std.int(hxd.Timer.fps());
+    fpsText.text = '$fps';
+    fpsText.x = girl.x - s2d.width / 2;
+    fpsText.y = girl.y - s2d.height / 2;
   }
 
   static function main() {

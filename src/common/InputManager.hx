@@ -5,9 +5,20 @@ enum InputName {
   s;
   a;
   d;
+  bslash;
   mouseL;
   mouseR;
   mouseMove;
+  num0;
+  num1;
+  num2;
+  num3;
+  num4;
+  num5;
+  num6;
+  num7;
+  num8;
+  num9;
 }
 
 class InputManager {
@@ -18,6 +29,17 @@ class InputManager {
     83 => InputName.s,
     65 => InputName.a,
     68 => InputName.d,
+    48 => InputName.num0,
+    49 => InputName.num1,
+    50 => InputName.num2,
+    51 => InputName.num3,
+    52 => InputName.num4,
+    53 => InputName.num5,
+    54 => InputName.num6,
+    55 => InputName.num7,
+    56 => InputName.num8,
+    57 => InputName.num9,
+    220 => InputName.bslash,
   ];
   static var keysDownEventHandlers: haxe.ds.Map<InputName, haxe.ds.Map<String, (repeat: Bool) -> Void>> = [
     InputName.mouseL => [],
@@ -26,6 +48,17 @@ class InputManager {
     InputName.a => [],
     InputName.s => [],
     InputName.d => [],
+    InputName.num0 => [],
+    InputName.num1 => [],
+    InputName.num2 => [],
+    InputName.num3 => [],
+    InputName.num4 => [],
+    InputName.num5 => [],
+    InputName.num6 => [],
+    InputName.num7 => [],
+    InputName.num8 => [],
+    InputName.num9 => [],
+    InputName.bslash => [],
   ];
   static var keysUpEventHandlers: haxe.ds.Map<InputName, haxe.ds.Map<String, () -> Void>> = [
     InputName.mouseL => [],
@@ -34,6 +67,17 @@ class InputManager {
     InputName.a => [],
     InputName.s => [],
     InputName.d => [],
+    InputName.num0 => [],
+    InputName.num1 => [],
+    InputName.num2 => [],
+    InputName.num3 => [],
+    InputName.num4 => [],
+    InputName.num5 => [],
+    InputName.num6 => [],
+    InputName.num7 => [],
+    InputName.num8 => [],
+    InputName.num9 => [],
+    InputName.bslash => [],
   ];
   static var changeEventHandlers: haxe.ds.Map<InputName, haxe.ds.Map<String, (event: hxd.Event) -> Void>> = [
     InputName.mouseMove => [],
@@ -45,6 +89,17 @@ class InputManager {
     InputName.a => false,
     InputName.s => false,
     InputName.d => false,
+    InputName.num0 => false,
+    InputName.num1 => false,
+    InputName.num2 => false,
+    InputName.num3 => false,
+    InputName.num4 => false,
+    InputName.num5 => false,
+    InputName.num6 => false,
+    InputName.num7 => false,
+    InputName.num8 => false,
+    InputName.num9 => false,
+    InputName.bslash => false,
   ];
   public static var mousePosition = { x: 0.0, y: 0.0 };
 
