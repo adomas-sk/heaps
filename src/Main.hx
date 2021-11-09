@@ -117,6 +117,7 @@ class Main extends hxd.App {
         building.x = newBuildingX;
         building.y = newBuildingY;
       };
+      // TODO: create order scheduler
       drones[0].orderDelivery(new Vector(newBuildingX, newBuildingY), addTile);
     }
 
