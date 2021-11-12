@@ -5,10 +5,7 @@ import h2d.Object;
 
 typedef Cell = {x: Int, y: Int};
 typedef Position = {x: Float, y: Float};
-// interface Cell {
-//   public var x: Float;
-//   public var y: Float;
-// }
+typedef Size = { w: Float, h: Float };
 
 class WorldGrid {
   public static inline var CELL_SIZE = 16;
@@ -24,9 +21,21 @@ class WorldGrid {
     return false;
   }
 
-  public static function addStaticObject(object: Object) {
-    var cell = getObjectCell(object);
-    staticObjects[cell.x + ":" + cell.y] = object;
+  public static function addStaticObject(object: Object, size: Size) {
+    var startingColumn = Math.floor((object.x - (size.w / 2)) / CELL_SIZE);
+    var endingColumn   = Math.floor((object.x + (size.w / 2)) / CELL_SIZE);
+    var startingRow    = Math.floor((object.y - (size.h / 2)) / CELL_SIZE);
+    var endingRow      = Math.floor((object.y + (size.h / 2)) / CELL_SIZE);
+
+    var columnCount = endingColumn - startingColumn;
+    var rowCount    = endingRow - startingRow;
+
+    for (row in 0 ... rowCount) {
+      for (column in 0 ... columnCount) {
+        var cell = { x: startingColumn + column, y: startingRow + row };
+        staticObjects[cell.x + ":" + cell.y] = object;
+      }
+    }
   }
 
   public static function removeStaticObject(object: Object) {
@@ -47,28 +56,26 @@ class WorldGrid {
   }
 
   public static function getNextPosition(currentPosition: Position, velocity: Position) {
-    var cell = getObjectCellFromPosition(currentPosition);
-    var ratio = {
-      x: cell.x + (currentPosition.x - cell.x * CELL_SIZE),
-      y: cell.y + (currentPosition.y - cell.y * CELL_SIZE)
-    };
-    var nextX = currentPosition.x;
-    var nextY = currentPosition.y;
-    if (ratio.x > 0.8 && checkCollision({x: cell.x + 1, y: cell.y})) {
-      nextX += cell.x * CELL_SIZE + CELL_SIZE * 0.8;
-    } else if (ratio.x < 0.2 && checkCollision({x: cell.x - 1, y: cell.y})) {
-      nextX += cell.x * CELL_SIZE + CELL_SIZE * 0.2;
-    } else {
-      nextX += velocity.x;
-    }
+    var nextPosition = { x: currentPosition.x + velocity.x, y: currentPosition.y + velocity.y };
+    var nextCell = getObjectCellFromPosition(nextPosition);
 
-    if (ratio.y > 0.8 && checkCollision({x: cell.x, y: cell.y + 1})) {
-      nextY += cell.y * CELL_SIZE + CELL_SIZE * 0.8;
-    } else if (ratio.y < 0.2 && checkCollision({x: cell.x, y: cell.y - 1})) {
-      nextY += cell.y * CELL_SIZE + CELL_SIZE * 0.2;
-    } else {
-      nextY += velocity.y;
+    // CHECK IF NEXT POSITION IS TAKEN
+    if (checkCollision(nextCell)) {
+      // CHECK IF MOVING ONLY IN X AXIS NEXT POSITION IS TAKEN
+      var withOnlyXVelocity = { x: currentPosition.x + velocity.x, y: currentPosition.y };
+      var cellWithOnlyXVelocity = getObjectCellFromPosition(withOnlyXVelocity);
+      if (checkCollision(cellWithOnlyXVelocity)) {
+        // CHECK IF MOVING ONLY IN Y AXIS NEXT POSITION IS TAKEN
+        var withOnlyYVelocity = { x: currentPosition.x, y: currentPosition.y + velocity.y };
+        var cellWithOnlyYVelocity = getObjectCellFromPosition(withOnlyYVelocity);
+        if (checkCollision(cellWithOnlyYVelocity)) {
+          // IF CAN'T MOVE IN SINGLE DIRECTIONS, STAY STILL
+          return currentPosition;
+        }
+        return withOnlyYVelocity;
+      }
+      return withOnlyXVelocity;
     }
-    return {x: nextX, y: nextY};
+    return nextPosition;
   }
 }

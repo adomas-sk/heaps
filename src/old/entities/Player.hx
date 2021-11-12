@@ -118,7 +118,6 @@ class Player {
       currentVelocity.normalize();
       currentVelocity.scale(SPEED);
       if (currentVelocity.length() > 0.5) {
-        // trace(currentVelocity.length());
         entity.setVelocity(currentVelocity.x, currentVelocity.y);
       }
     }

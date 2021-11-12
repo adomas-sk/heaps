@@ -1,14 +1,24 @@
+import h2d.Layers;
+import hxd.Window;
+import common.OrderHandler;
+import common.DroneScheduler;
 import common.GroundRenderer;
 import entities.Drone;
 import common.InputManager;
-import h3d.Vector;
 import entities.Girl;
 import h2d.Bitmap;
+
+var layerIndexes = {
+  GROUND: 0,
+  ON_GROUND: 1,
+};
 
 class Main extends hxd.App {
   static inline var BLOCK_SIZE = 32;
 
   public static var scene: h2d.Scene;
+  public static var girl: Girl;
+  public static var layers: Layers;
 
   var devMode = false;
   var dragging = false;
@@ -20,21 +30,29 @@ class Main extends hxd.App {
   var square: Bitmap;
 
   var drones: Array<Drone> = [];
-  var girl: Girl;
 
   override function init() {
     // Window.getInstance().vsync = false;
-    hxd.Window.getInstance().addEventTarget(InputManager.onEvent);
+    Window.getInstance().addEventTarget(InputManager.onEvent);
     scene = s2d;
+
+    // LAYERS
+    layers = new Layers(s2d);
 
     // GROUND
     GroundRenderer.renderGround();
 
     // GIRL
     girl = new Girl(0, 0);
+    layers.add(girl, layerIndexes.ON_GROUND);
 
     // DRONE
-    drones.push(new Drone(girl));
+    DroneScheduler.init();
+    for (i in 0 ... 10) {
+      var newDrone = new Drone(girl);
+      layers.add(newDrone, layerIndexes.ON_GROUND);
+      DroneScheduler.addDrone(newDrone);
+    }
 
     // CAMERA
     s2d.interactiveCamera.follow = girl;
@@ -42,14 +60,7 @@ class Main extends hxd.App {
     s2d.interactiveCamera.anchorY = 0.5;
 
     // CONTROL
-    square = new Bitmap(h2d.Tile.fromColor(0x0099FF, BLOCK_SIZE, BLOCK_SIZE, 0.4), s2d);
-    InputManager.registerChangeEventHandler("building-square", InputName.mouseMove, (event: hxd.Event) -> {
-      var mouseX = s2d.interactiveCamera.x - s2d.width / 2 + event.relX - 2;
-      var mouseY = s2d.interactiveCamera.y - s2d.height / 2 + event.relY - 2;
-
-      square.x = Math.floor(mouseX / BLOCK_SIZE) * BLOCK_SIZE;
-      square.y = Math.floor(mouseY / BLOCK_SIZE) * BLOCK_SIZE;
-    });
+    OrderHandler.init();
 
     // DEVMODE
     InputManager.registerEventHandler("devmode", InputName.bslash, (repeat: Bool) -> {
@@ -95,32 +106,6 @@ class Main extends hxd.App {
       });
     });
 
-    var interaction = new h2d.Interactive(BLOCK_SIZE, BLOCK_SIZE, square);
-    interaction.onPush = function(event : hxd.Event) {
-      square.alpha = 0.7;
-    }
-    interaction.onRelease = function(event : hxd.Event) {
-      draggedMouseThrough = [];
-      square.alpha = 1;
-    }
-    interaction.onClick = function(event : hxd.Event) {
-      if (devMode) {
-        return;
-      }
-      var newBuildingX = square.x + BLOCK_SIZE / 2;
-      var newBuildingY = square.y + BLOCK_SIZE / 2;
-      var addTile = () -> {
-        var tile = h2d.Tile.fromColor(0x3d3322, BLOCK_SIZE, BLOCK_SIZE, 1);
-        tile.dx -= BLOCK_SIZE / 2;
-        tile.dy -= BLOCK_SIZE / 2;
-        var building = new Bitmap(tile, s2d);
-        building.x = newBuildingX;
-        building.y = newBuildingY;
-      };
-      // TODO: create order scheduler
-      drones[0].orderDelivery(new Vector(newBuildingX, newBuildingY), addTile);
-    }
-
     // FPS
     var font : h2d.Font = hxd.res.DefaultFont.get();
     fpsText = new h2d.Text(font, s2d);
@@ -130,9 +115,7 @@ class Main extends hxd.App {
   }
 
   override function update(dt:Float) {
-    for(drone in drones) {
-      drone.update(dt);
-    }
+    DroneScheduler.updateDrones(dt);
     girl.update(dt);
     
     var fps = Std.int(hxd.Timer.fps());

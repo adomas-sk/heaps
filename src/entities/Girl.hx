@@ -74,7 +74,7 @@ class Girl extends Object {
 
     GirlAnimation.loadAnimation();
     animation = new Anim(GirlAnimation.animations[GirlAnimations.IDLE_L], 8, this);
-    // new h2d.Bitmap(h2d.Tile.fromColor(0xff4589, 4, 4, 1), animation);
+    new h2d.Bitmap(h2d.Tile.fromColor(0xff4589, 4, 4, 1), animation);
 
     registerInput();
   }
@@ -82,6 +82,9 @@ class Girl extends Object {
   public function update(dt: Float) {
     if (controlling > 0) {
       velocity = {x: 0., y: 0.};
+    }
+    if (Math.abs(velocity.x) < 0.1 && Math.abs(velocity.y) < 0.1) {
+      return;
     }
     var nextPos = WorldGrid.getNextPosition({x: x, y: y}, {x: velocity.x * dt, y: velocity.y * dt});
     x = nextPos.x;
@@ -105,7 +108,10 @@ class Girl extends Object {
       animation.play(GirlAnimation.animations[lookingRight ? GirlAnimations.IDLE_R : GirlAnimations.IDLE_L]);
       return;
     }
-    animation.play(GirlAnimation.animations[lookingRight ? GirlAnimations.WALK_R : GirlAnimations.WALK_L]);
+    var nextAnimations = GirlAnimation.animations[lookingRight ? GirlAnimations.WALK_R : GirlAnimations.WALK_L];
+    if (nextAnimations != animation.frames) {
+      animation.play(nextAnimations);
+    }
   }
 
   function registerInput() {
