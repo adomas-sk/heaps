@@ -1,78 +1,202 @@
 package common;
 
+import common.WorldGrid.Cell;
+import entities.buildings.Drill;
+import haxe.ds.Map;
 import Main.layerIndexes;
 import common.DroneScheduler.DroneOrderTypes;
 import h3d.Vector;
-import h2d.Interactive;
 import common.InputManager;
 import h2d.Bitmap;
+import h2d.Object;
+
+typedef BuildIndicator = {
+  var h: Int;
+  var w: Int;
+}
+typedef BuildIndicatorInfo = {
+  var h: Int;
+  var w: Int;
+  var hOffset: Int;
+  var wOffset: Int;
+}
 
 class OrderHandler {
   static inline var BLOCK_SIZE = 32;
-  static var square: Bitmap;
-  static var interactable: Interactive;
+  static var buildIndicator: Bitmap;
+  static var buildIndicatorInfo: BuildIndicatorInfo = {
+    h: 32,
+    w: 32,
+    hOffset: 0,
+    wOffset: 0,
+  };
 
-  static var currentOrderBlocks: Array<{ x: Int, y: Int }> = [];
-  static var ordering = false;
+  static var currentOrderType: Null<DroneOrderTypes> = null;
+
+  static var buildings: Map<String, Object> = [];
 
   public static function init() {
-    square = new Bitmap(h2d.Tile.fromColor(0x0099FF, BLOCK_SIZE, BLOCK_SIZE, 0.4), Main.scene);
+    buildIndicator = new Bitmap(h2d.Tile.fromColor(0x0099FF, BLOCK_SIZE, BLOCK_SIZE, 0.4), Main.scene);
+    setSquare({ w: 128, h: 128 });
     InputManager.registerChangeEventHandler("building-square", InputName.mouseMove, (event: hxd.Event) -> {
-      var cell = getCell(event);
+      var cell = getCell(true);
 
-      square.x = cell.x * BLOCK_SIZE;
-      square.y = cell.y * BLOCK_SIZE;
+      buildIndicator.x = cell.x * BLOCK_SIZE;
+      buildIndicator.y = cell.y * BLOCK_SIZE;
 
-      if (ordering) {
-        for (pastBlock in currentOrderBlocks) {
-          if (pastBlock.x == cell.x && pastBlock.y == cell.y) {
-            return;
-          }
-        }
-
-        currentOrderBlocks.push(cell);
-        createOrder(event);
+      if (currentOrderType != null) {
+        createOrder(currentOrderType);
       }
     });
 
-    interactable = new Interactive(BLOCK_SIZE, BLOCK_SIZE, square);
-    interactable.onPush = function(event : hxd.Event) {
-      square.alpha = 0.7;
+    InputManager.registerEventHandler("order-handler-mouseL", InputName.mouseL, (repeat: Bool) -> {
+      if (currentOrderType == null) {
+        buildIndicator.alpha = 0.7;
 
-      ordering = true;
-      currentOrderBlocks.push(getCell(event));
-      createOrder(event);
-    }
-    interactable.onRelease = function(event : hxd.Event) {
-      square.alpha = 1;
+        currentOrderType = DroneOrderTypes.DELIVER;
+        createOrder(currentOrderType);
+      }
+    });
+    InputManager.registerReleaseEventHandler("order-handler-mouseL", InputName.mouseL, () -> {
+      buildIndicator.alpha = 1;
 
-      currentOrderBlocks = [];
-      ordering = false;
-    }
+      currentOrderType = null;
+    });
+
+    InputManager.registerEventHandler("order-handler-mouseR", InputName.mouseR, (repeat: Bool) -> {
+      if (currentOrderType == null) {
+        buildIndicator.alpha = 0.7;
+
+        currentOrderType = DroneOrderTypes.RETRIEVE;
+        createOrder(currentOrderType);
+      }
+    });
+    InputManager.registerReleaseEventHandler("order-handler-mouseR", InputName.mouseR, () -> {
+      buildIndicator.alpha = 1;
+
+      currentOrderType = null;
+    });
   }
 
-  static function createOrder(event : hxd.Event) {
-    var newBuildingX = square.x + BLOCK_SIZE / 2;
-    var newBuildingY = square.y + BLOCK_SIZE / 2;
-
-    var tile = h2d.Tile.fromColor(0x3d3322, BLOCK_SIZE, BLOCK_SIZE, 1);
-    tile.dx -= BLOCK_SIZE / 2;
-    tile.dy -= BLOCK_SIZE / 2;
-    var building = new Bitmap(tile, Main.scene);
-    building.x = newBuildingX;
-    building.y = newBuildingY;
-    building.alpha = 0.5;
-
-    Main.layers.add(building, layerIndexes.GROUND);
-
-    var addTile = () -> {
-      building.alpha = 1;
-      WorldGrid.addStaticObject(building, { h: BLOCK_SIZE, w: BLOCK_SIZE });
+  public static function setSquare(newBuildIndicator: BuildIndicator) {
+    buildIndicator.remove();
+    buildIndicatorInfo = {
+      hOffset: Math.round((newBuildIndicator.h - BLOCK_SIZE) / 2),
+      wOffset: Math.round((newBuildIndicator.w - BLOCK_SIZE) / 2),
+      w: newBuildIndicator.w,
+      h: newBuildIndicator.h
     };
-    DroneScheduler.addOrder({location: new Vector(newBuildingX, newBuildingY), type: DroneOrderTypes.DELIVER, callBack: addTile});
+    buildIndicator = new Bitmap(
+      h2d.Tile.fromColor(
+        0x0099FF,
+        newBuildIndicator.w,
+        newBuildIndicator.h,
+        0.4
+      ),
+      Main.scene
+    );
   }
 
-  static function getCell(event : hxd.Event) {
-    return { x: Math.floor(Main.scene.mouseX / BLOCK_SIZE), y: Math.floor(Main.scene.mouseY / BLOCK_SIZE) };
+  static function createOrder(orderType: DroneOrderTypes) {
+    switch(orderType) {
+      case DroneOrderTypes.DELIVER: {
+        var cell = getCell(true);
+        if (!isBuildingSpaceFree(cell)) {
+          return;
+        }
+        var newBuildingX = buildIndicator.x + buildIndicatorInfo.w / 2;
+        var newBuildingY = buildIndicator.y + buildIndicatorInfo.h / 2;
+
+        DroneScheduler.addOrder({
+          location: new Vector(newBuildingX, newBuildingY),
+          type: orderType,
+          callBack: createDeliverCallback(newBuildingX, newBuildingY)
+        });
+      }
+      case DroneOrderTypes.RETRIEVE: {
+        var cell = getCell();
+        var buildingInCell = buildings[cell.x + ":" + cell.y];
+        if (buildingInCell != null && buildingInCell.alpha > 0.99) {
+          DroneScheduler.addOrder({
+            location: new Vector(buildingInCell.x, buildingInCell.y),
+            type: orderType,
+            callBack: createRetrieveCallback(buildingInCell)
+          });
+        }
+      }
+    }
+  }
+
+  static function createDeliverCallback(buildingX: Float, buildingY: Float) {
+    var drill = new Drill({x: buildingX, y: buildingY});
+
+    Main.layers.add(drill, layerIndexes.GROUND);
+    var cell = getCell(true);
+    addBuildings(cell, drill);
+
+    return () -> {
+      drill.build();
+      WorldGrid.addStaticObject(drill, { h: buildIndicatorInfo.h, w: buildIndicatorInfo.w });
+    };
+  }
+
+  static function createRetrieveCallback(building: Object) {
+    var cell = getCell();
+
+    var tile = h2d.Tile.fromColor(0xfc2c03, buildIndicatorInfo.w, buildIndicatorInfo.h, 1);
+    tile.dx -= buildIndicatorInfo.w / 2;
+    tile.dy -= buildIndicatorInfo.h / 2;
+    var removalIndicator = new Bitmap(tile, Main.scene);
+    removalIndicator.x = building.x;
+    removalIndicator.y = building.y;
+    removalIndicator.alpha = 0.5;
+
+    removeBuildings(cell);
+    return () -> {
+      removalIndicator.remove();
+      building.remove();
+      WorldGrid.removeStaticObject(building, { h: buildIndicatorInfo.h, w: buildIndicatorInfo.w });
+    };
+  }
+
+  static function getCell(?withOffset: Bool): Cell {
+    return {
+      x: Math.floor((Main.scene.mouseX - (withOffset ? buildIndicatorInfo.wOffset : 0)) / BLOCK_SIZE),
+      y: Math.floor((Main.scene.mouseY - (withOffset ? buildIndicatorInfo.hOffset : 0)) / BLOCK_SIZE)
+    };
+  }
+
+  static function addBuildings(cell: Cell, building: Object) {
+    var cols = Math.round(buildIndicatorInfo.w / BLOCK_SIZE);
+    var rows = Math.round(buildIndicatorInfo.h / BLOCK_SIZE);
+
+    for (col in 0 ... cols) {
+      for (row in 0 ... rows) {
+        buildings[(cell.x + col) + ":" + (cell.y + row)] = building;
+      }
+    }
+  }
+
+  static function isBuildingSpaceFree(cell: Cell) {
+    var cols = Math.round(buildIndicatorInfo.w / BLOCK_SIZE);
+    var rows = Math.round(buildIndicatorInfo.h / BLOCK_SIZE);
+
+    for (col in 0 ... cols) {
+      for (row in 0 ... rows) {
+        if (buildings[(cell.x + col) + ":" + (cell.y + row)] != null) {
+          return false;
+        }
+      }
+    }
+    return true;
+  }
+
+  static function removeBuildings(cell: Cell) {
+    var building = buildings[cell.x + ":" + cell.y];
+    for (key in buildings.keys()) {
+      if (buildings[key] == building) {
+        buildings[key] = null;
+      }
+    }
   }
 }

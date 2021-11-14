@@ -38,9 +38,21 @@ class WorldGrid {
     }
   }
 
-  public static function removeStaticObject(object: Object) {
-    var cell = getObjectCell(object);
-    return staticObjects.remove(cell.x + ":" + cell.y);
+  public static function removeStaticObject(object: Object, size: Size) {
+    var startingColumn = Math.floor((object.x - (size.w / 2)) / CELL_SIZE);
+    var endingColumn   = Math.floor((object.x + (size.w / 2)) / CELL_SIZE);
+    var startingRow    = Math.floor((object.y - (size.h / 2)) / CELL_SIZE);
+    var endingRow      = Math.floor((object.y + (size.h / 2)) / CELL_SIZE);
+
+    var columnCount = endingColumn - startingColumn;
+    var rowCount    = endingRow - startingRow;
+
+    for (row in 0 ... rowCount) {
+      for (column in 0 ... columnCount) {
+        var cell = { x: startingColumn + column, y: startingRow + row };
+        staticObjects.remove(cell.x + ":" + cell.y);
+      }
+    }
   }
 
   public static function addDynamicObject() {

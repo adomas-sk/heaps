@@ -6,6 +6,7 @@ import h3d.Vector;
 
 enum DroneOrderTypes {
   DELIVER;
+  RETRIEVE;
 }
 
 typedef DroneOrder= {
@@ -52,6 +53,20 @@ class DroneScheduler {
     return true;
   }
 
+  public static function updateDrones(dt: Float) {
+    for (drone in workingDrones) {
+      drone.update(dt);
+    }
+    for (drone in freeDrones) {
+      drone.update(dt);
+    }
+  }
+
+  public static function resizeHandler() {
+    droneCount.x = -Main.scene.width / 2;
+    droneCount.y = -Main.scene.height / 2 + 30;
+  }
+
   static function startExecutingOrder() {
     if (freeDrones.length == 0) {
       return;
@@ -62,15 +77,6 @@ class DroneScheduler {
     workingDrones.push(nextDrone);
     nextDrone.order(nextOrder);
     updateText(); 
-  }
-
-  public static function updateDrones(dt: Float) {
-    for (drone in workingDrones) {
-      drone.update(dt);
-    }
-    for (drone in freeDrones) {
-      drone.update(dt);
-    }
   }
 
   static function updateText() {

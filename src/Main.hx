@@ -34,6 +34,7 @@ class Main extends hxd.App {
   override function init() {
     // Window.getInstance().vsync = false;
     Window.getInstance().addEventTarget(InputManager.onEvent);
+    Window.getInstance().addResizeEvent(resizeHandler);
     scene = s2d;
 
     // LAYERS
@@ -46,7 +47,7 @@ class Main extends hxd.App {
     girl = new Girl(0, 0);
     layers.add(girl, layerIndexes.ON_GROUND);
 
-    // DRONE
+    // DRONES
     DroneScheduler.init();
     for (i in 0 ... 10) {
       var newDrone = new Drone(girl);
@@ -122,6 +123,10 @@ class Main extends hxd.App {
     fpsText.text = '$fps';
     fpsText.x = girl.x - s2d.width / 2;
     fpsText.y = girl.y - s2d.height / 2;
+  }
+
+  static function resizeHandler() {
+    DroneScheduler.resizeHandler();
   }
 
   static function main() {
