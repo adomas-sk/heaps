@@ -40,14 +40,9 @@ class DroneAnimation {
 
   static function spritePreProcess(image: h2d.Tile, x: Int, y: Int, size: Int, ?flipX: Bool) {
     var tile = image.sub(x, y, SPRITE_SIZE, SPRITE_SIZE);
-    if (flipX) {
-      tile.flipX();
-      tile.dx -= SPRITE_SIZE / 2;
-    } else {
-      tile.dx -= SPRITE_SIZE;
-    }
-    tile.scaleToSize(SPRITE_SIZE * 2, SPRITE_SIZE * 2);
-    tile.dy -= SPRITE_SIZE;
+    // tile.scaleToSize(SPRITE_SIZE * 2, SPRITE_SIZE * 2);
+    tile.dy -= SPRITE_SIZE / 2;
+    tile.dx -= SPRITE_SIZE / 2;
     return tile;
   }
 }
@@ -62,6 +57,7 @@ enum DroneActions {
 
 class Drone extends Object {
   static inline var SPEED = 100;
+  static inline var Y_OFFSET_FROM_SOURCE = 32;
 
   var animation: Anim;
   var action: DroneActions;
@@ -107,7 +103,7 @@ class Drone extends Object {
     switch(action) {
       case DroneActions.COMING_OUT: {
         x = source.x;
-        y = source.y - 64;
+        y = source.y - Y_OFFSET_FROM_SOURCE;
       }
       case DroneActions.DELIVERING: {
         deliver(dt);
@@ -117,7 +113,7 @@ class Drone extends Object {
       }
       case DroneActions.COMING_IN: {
         x = source.x;
-        y = source.y - 64;
+        y = source.y - Y_OFFSET_FROM_SOURCE;
       }
       case DroneActions.IDLE:
         return;
@@ -148,7 +144,7 @@ class Drone extends Object {
   }
 
   function comeBack(dt: Float) {
-    var sourceDestination = new Vector(source.x, source.y - 64);
+    var sourceDestination = new Vector(source.x, source.y - Y_OFFSET_FROM_SOURCE);
     var difference = sourceDestination.sub(new Vector(x, y));
     if (difference.length() < 5) {
       var anotherOrderAdded = DroneScheduler.announceAboutOrderCompletion(this);

@@ -30,9 +30,9 @@ class DrillAnimation {
 
   static function spritePreProcess(image: h2d.Tile, x: Int, y: Int, size: Int, ?flipX: Bool) {
     var tile = image.sub(x, y, SPRITE_SIZE, SPRITE_SIZE);
-    tile.scaleToSize(SPRITE_SIZE * 2, SPRITE_SIZE * 2);
-    tile.dy -= SPRITE_SIZE;
-    tile.dx -= SPRITE_SIZE;
+    // tile.scaleToSize(SPRITE_SIZE * 2, SPRITE_SIZE * 2);
+    tile.dy -= SPRITE_SIZE / 2;
+    tile.dx -= SPRITE_SIZE / 2;
     return tile;
   }
 }

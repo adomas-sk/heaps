@@ -37,7 +37,7 @@ class OrderHandler {
 
   public static function init() {
     buildIndicator = new Bitmap(h2d.Tile.fromColor(0x0099FF, BLOCK_SIZE, BLOCK_SIZE, 0.4), Main.scene);
-    setSquare({ w: 128, h: 128 });
+    setSquare({ w: 64, h: 64});
     InputManager.registerChangeEventHandler("building-square", InputName.mouseMove, (event: hxd.Event) -> {
       var cell = getCell(true);
 

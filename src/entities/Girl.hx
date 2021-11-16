@@ -34,12 +34,12 @@ class GirlAnimation {
     }
     var girlImage = hxd.Res.girl.character.toTile();
 
-    animations[GirlAnimations.CONTROL_L] = [for(x in 0 ... 3) spritePreProcess(girlImage, x * SPRITE_SIZE, 0              , SPRITE_SIZE)];
-    animations[GirlAnimations.CONTROL_R] = [for(x in 0 ... 3) spritePreProcess(girlImage, x * SPRITE_SIZE, SPRITE_SIZE    , SPRITE_SIZE)];
-    animations[GirlAnimations.IDLE_L] =    [for(x in 0 ... 4) spritePreProcess(girlImage, x * SPRITE_SIZE, 2 * SPRITE_SIZE, SPRITE_SIZE)];
-    animations[GirlAnimations.IDLE_R] =    [for(x in 0 ... 4) spritePreProcess(girlImage, x * SPRITE_SIZE, 3 * SPRITE_SIZE, SPRITE_SIZE)];
-    animations[GirlAnimations.WALK_L] =    [for(x in 0 ... 8) spritePreProcess(girlImage, x * SPRITE_SIZE, 4 * SPRITE_SIZE, SPRITE_SIZE)];
-    animations[GirlAnimations.WALK_R] =    [for(x in 0 ... 8) spritePreProcess(girlImage, x * SPRITE_SIZE, 5 * SPRITE_SIZE, SPRITE_SIZE)];
+    animations[GirlAnimations.IDLE_R] =    [for(x in 0 ... 4) spritePreProcess(girlImage, x * SPRITE_SIZE, 0              , SPRITE_SIZE)];
+    animations[GirlAnimations.IDLE_L] =    [for(x in 0 ... 4) spritePreProcess(girlImage, x * SPRITE_SIZE, SPRITE_SIZE    , SPRITE_SIZE)];
+    animations[GirlAnimations.CONTROL_R] = [for(x in 0 ... 3) spritePreProcess(girlImage, x * SPRITE_SIZE, 2 * SPRITE_SIZE, SPRITE_SIZE)];
+    animations[GirlAnimations.CONTROL_L] = [for(x in 0 ... 3) spritePreProcess(girlImage, x * SPRITE_SIZE, 3 * SPRITE_SIZE, SPRITE_SIZE)];
+    animations[GirlAnimations.WALK_R] =    [for(x in 0 ... 8) spritePreProcess(girlImage, x * SPRITE_SIZE, 4 * SPRITE_SIZE, SPRITE_SIZE)];
+    animations[GirlAnimations.WALK_L] =    [for(x in 0 ... 8) spritePreProcess(girlImage, x * SPRITE_SIZE, 5 * SPRITE_SIZE, SPRITE_SIZE)];
 
     animationsLoaded = true;
   }
@@ -48,18 +48,18 @@ class GirlAnimation {
     var tile = image.sub(x, y, SPRITE_SIZE, SPRITE_SIZE);
     if (flipX) {
       tile.flipX();
-      tile.dx -= SPRITE_SIZE / 2;
+      tile.dx -= SPRITE_SIZE / 4;
     } else {
-      tile.dx -= SPRITE_SIZE;
+      tile.dx -= SPRITE_SIZE / 2;
     }
-    tile.scaleToSize(SPRITE_SIZE * 2, SPRITE_SIZE * 2);
-    tile.dy -= SPRITE_SIZE;
+    // tile.scaleToSize(SPRITE_SIZE * 2, SPRITE_SIZE * 2);
+    tile.dy -= SPRITE_SIZE / 2;
     return tile;
   }
 }
 
 class Girl extends Object {
-  static inline var SPEED = 150;
+  static inline var SPEED = 75;
 
   var animation: Anim;
   var direction = {x: 0., y: 0.};
