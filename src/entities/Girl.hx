@@ -1,37 +1,25 @@
 package entities;
 
+import common.Animation;
 import h3d.Vector;
 import common.InputManager;
 import common.WorldGrid;
 import h2d.Anim;
 import h2d.Object;
 
-enum GirlAnimations {
-  IDLE_L;
-  IDLE_R;
-  WALK_L;
-  WALK_R;
-  CONTROL_R;
-  CONTROL_L;
+enum abstract GirlAnimations(Int) to Int {
+  var IDLE_L;
+  var IDLE_R;
+  var WALK_L;
+  var WALK_R;
+  var CONTROL_R;
+  var CONTROL_L;
 }
 
-class GirlAnimation {
-  public static inline var SPRITE_SIZE = 64;
+class GirlAnimation extends Animation<GirlAnimations> {
+  public static var SPRITE_SIZE = 64;
 
-  public static var animations: haxe.ds.Map<GirlAnimations, Array<h2d.Tile>> = [
-    GirlAnimations.IDLE_L => [],
-    GirlAnimations.IDLE_R => [],
-    GirlAnimations.WALK_L => [],
-    GirlAnimations.WALK_R => [],
-    GirlAnimations.CONTROL_R => [],
-    GirlAnimations.CONTROL_L => [],
-  ];
-  static var animationsLoaded = false;
-
-  public static function loadAnimation() {
-    if (animationsLoaded) {
-      return;
-    }
+  override public function getAnimations() {
     var girlImage = hxd.Res.girl.character.toTile();
 
     animations[GirlAnimations.IDLE_R] =    [for(x in 0 ... 4) spritePreProcess(girlImage, x * SPRITE_SIZE, 0              , SPRITE_SIZE)];
@@ -40,27 +28,13 @@ class GirlAnimation {
     animations[GirlAnimations.CONTROL_L] = [for(x in 0 ... 3) spritePreProcess(girlImage, x * SPRITE_SIZE, 3 * SPRITE_SIZE, SPRITE_SIZE)];
     animations[GirlAnimations.WALK_R] =    [for(x in 0 ... 8) spritePreProcess(girlImage, x * SPRITE_SIZE, 4 * SPRITE_SIZE, SPRITE_SIZE)];
     animations[GirlAnimations.WALK_L] =    [for(x in 0 ... 8) spritePreProcess(girlImage, x * SPRITE_SIZE, 5 * SPRITE_SIZE, SPRITE_SIZE)];
-
-    animationsLoaded = true;
-  }
-
-  static function spritePreProcess(image: h2d.Tile, x: Int, y: Int, size: Int, ?flipX: Bool) {
-    var tile = image.sub(x, y, SPRITE_SIZE, SPRITE_SIZE);
-    if (flipX) {
-      tile.flipX();
-      tile.dx -= SPRITE_SIZE / 4;
-    } else {
-      tile.dx -= SPRITE_SIZE / 2;
-    }
-    // tile.scaleToSize(SPRITE_SIZE * 2, SPRITE_SIZE * 2);
-    tile.dy -= SPRITE_SIZE / 2;
-    return tile;
   }
 }
 
 class Girl extends Object {
   static inline var SPEED = 75;
 
+  var animationLoader: Animation<GirlAnimations>;
   var animation: Anim;
   var direction = {x: 0., y: 0.};
   var velocity = {x: 0., y: 0.};
@@ -72,8 +46,8 @@ class Girl extends Object {
     this.x = x;
     this.y = y;
 
-    GirlAnimation.loadAnimation();
-    animation = new Anim(GirlAnimation.animations[GirlAnimations.IDLE_L], 8, this);
+    animationLoader = new GirlAnimation(GirlAnimation.SPRITE_SIZE);
+    animation = new Anim(animationLoader.animations[GirlAnimations.IDLE_L], 8, this);
     new h2d.Bitmap(h2d.Tile.fromColor(0xff4589, 4, 4, 1), animation);
 
     registerInput();
@@ -101,14 +75,14 @@ class Girl extends Object {
       lookingRight = true;
     }
     if (controlling > 0) {
-      animation.play(GirlAnimation.animations[lookingRight ? GirlAnimations.CONTROL_R : GirlAnimations.CONTROL_L]);
+      animation.play(animationLoader.animations[lookingRight ? GirlAnimations.CONTROL_R : GirlAnimations.CONTROL_L]);
       return;
     }
     if (vel.length() < 1) {
-      animation.play(GirlAnimation.animations[lookingRight ? GirlAnimations.IDLE_R : GirlAnimations.IDLE_L]);
+      animation.play(animationLoader.animations[lookingRight ? GirlAnimations.IDLE_R : GirlAnimations.IDLE_L]);
       return;
     }
-    var nextAnimations = GirlAnimation.animations[lookingRight ? GirlAnimations.WALK_R : GirlAnimations.WALK_L];
+    var nextAnimations = animationLoader.animations[lookingRight ? GirlAnimations.WALK_R : GirlAnimations.WALK_L];
     if (nextAnimations != animation.frames) {
       animation.play(nextAnimations);
     }

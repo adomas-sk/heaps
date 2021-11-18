@@ -1,49 +1,29 @@
 package entities;
 
+import common.Animation;
 import common.DroneScheduler;
 import common.DroneScheduler.DroneOrder;
 import h3d.Vector;
 import h2d.Anim;
 import h2d.Object;
 
-enum DroneAnimations {
-  COMING_OUT;
-  COMING_IN;
-  TRAVEL_EMPTY;
-  TRAVEL_CARRY;
+enum abstract DroneAnimations(Int) to Int {
+  var COMING_OUT;
+  var COMING_IN;
+  var TRAVEL_EMPTY;
+  var TRAVEL_CARRY;
 }
 
-class DroneAnimation {
+class DroneAnimation extends Animation<DroneAnimations>{
   public static inline var SPRITE_SIZE = 32;
 
-  public static var animations: haxe.ds.Map<DroneAnimations, Array<h2d.Tile>> = [
-    DroneAnimations.COMING_OUT => [],
-    DroneAnimations.COMING_IN => [],
-    DroneAnimations.TRAVEL_EMPTY => [],
-    DroneAnimations.TRAVEL_CARRY => [],
-  ];
-  static var animationsLoaded = false;
+  override public function getAnimations() {
+    var image = hxd.Res.drone.drone.toTile();
 
-  public static function loadAnimation() {
-    if (animationsLoaded) {
-      return;
-    }
-    var droneImage = hxd.Res.drone.drone.toTile();
-    
-    animations[DroneAnimations.COMING_IN] =    [for(x in 0 ... 5) spritePreProcess(droneImage, x * SPRITE_SIZE      , 0               , SPRITE_SIZE)];
-    animations[DroneAnimations.COMING_OUT] =   [for(x in 0 ... 5) spritePreProcess(droneImage, (5 - x) * SPRITE_SIZE, 0               , SPRITE_SIZE)];
-    animations[DroneAnimations.TRAVEL_CARRY] = [for(x in 0 ... 4) spritePreProcess(droneImage, x * SPRITE_SIZE      , SPRITE_SIZE     , SPRITE_SIZE)];
-    animations[DroneAnimations.TRAVEL_EMPTY] = [for(x in 0 ... 4) spritePreProcess(droneImage, x * SPRITE_SIZE      , 2 * SPRITE_SIZE , SPRITE_SIZE)];
-
-    animationsLoaded = true;
-  }
-
-  static function spritePreProcess(image: h2d.Tile, x: Int, y: Int, size: Int, ?flipX: Bool) {
-    var tile = image.sub(x, y, SPRITE_SIZE, SPRITE_SIZE);
-    // tile.scaleToSize(SPRITE_SIZE * 2, SPRITE_SIZE * 2);
-    tile.dy -= SPRITE_SIZE / 2;
-    tile.dx -= SPRITE_SIZE / 2;
-    return tile;
+    animations[DroneAnimations.COMING_IN] =    [for(x in 0 ... 5) spritePreProcess(image, x * SPRITE_SIZE      , 0               , SPRITE_SIZE)];
+    animations[DroneAnimations.COMING_OUT] =   [for(x in 0 ... 5) spritePreProcess(image, (5 - x) * SPRITE_SIZE, 0               , SPRITE_SIZE)];
+    animations[DroneAnimations.TRAVEL_CARRY] = [for(x in 0 ... 4) spritePreProcess(image, x * SPRITE_SIZE      , SPRITE_SIZE     , SPRITE_SIZE)];
+    animations[DroneAnimations.TRAVEL_EMPTY] = [for(x in 0 ... 4) spritePreProcess(image, x * SPRITE_SIZE      , 2 * SPRITE_SIZE , SPRITE_SIZE)];
   }
 }
 
@@ -59,6 +39,7 @@ class Drone extends Object {
   static inline var SPEED = 100;
   static inline var Y_OFFSET_FROM_SOURCE = 32;
 
+  var animationLoader: Animation<DroneAnimations>;
   var animation: Anim;
   var action: DroneActions;
   
@@ -72,8 +53,8 @@ class Drone extends Object {
     y = 0;
     action = DroneActions.IDLE;
 
-    DroneAnimation.loadAnimation();
-    animation = new Anim(DroneAnimation.animations[DroneAnimations.COMING_OUT], 10, this);
+    animationLoader = new DroneAnimation(DroneAnimation.SPRITE_SIZE);
+    animation = new Anim(animationLoader.animations[DroneAnimations.COMING_OUT], 10, this);
     // new h2d.Bitmap(h2d.Tile.fromColor(0xFF0000, 10, 10, 1), this);
     animation.visible = false;
     animation.pause = true;
@@ -81,7 +62,7 @@ class Drone extends Object {
       switch(action) {
         case DroneActions.COMING_OUT: {
           action = DroneActions.DELIVERING;
-          animation.play(DroneAnimation.animations[DroneAnimations.TRAVEL_CARRY]);
+          animation.play(animationLoader.animations[DroneAnimations.TRAVEL_CARRY]);
         }
         case DroneActions.DELIVERING:
         case DroneActions.COMING_BACK:
@@ -89,7 +70,7 @@ class Drone extends Object {
         case DroneActions.COMING_IN: {
           currentOrder = null;
           action = DroneActions.IDLE;
-          animation.play(DroneAnimation.animations[DroneAnimations.COMING_OUT]);
+          animation.play(animationLoader.animations[DroneAnimations.COMING_OUT]);
           animation.visible = false;
           animation.pause = true;
         }
@@ -123,7 +104,7 @@ class Drone extends Object {
   public function order(order: DroneOrder) {
     currentOrder = order;
     if (action == DroneActions.COMING_IN) {
-      animation.play(DroneAnimation.animations[DroneAnimations.COMING_OUT]);
+      animation.play(animationLoader.animations[DroneAnimations.COMING_OUT]);
     }
     action = DroneActions.COMING_OUT;
     animation.visible = true;
@@ -134,7 +115,7 @@ class Drone extends Object {
     var difference = currentOrder.location.sub(new Vector(x, y));
     if (difference.length() < 5) {
       currentOrder.callBack();
-      animation.play(DroneAnimation.animations[DroneAnimations.TRAVEL_EMPTY]);
+      animation.play(animationLoader.animations[DroneAnimations.TRAVEL_EMPTY]);
       action = DroneActions.COMING_BACK;
       return;
     }
@@ -150,10 +131,10 @@ class Drone extends Object {
       var anotherOrderAdded = DroneScheduler.announceAboutOrderCompletion(this);
       if (anotherOrderAdded) {
         action = DroneActions.DELIVERING;
-        animation.play(DroneAnimation.animations[DroneAnimations.TRAVEL_CARRY]);
+        animation.play(animationLoader.animations[DroneAnimations.TRAVEL_CARRY]);
         return;
       }
-      animation.play(DroneAnimation.animations[DroneAnimations.COMING_IN]);
+      animation.play(animationLoader.animations[DroneAnimations.COMING_IN]);
       action = DroneActions.COMING_IN;
       return;
     }
