@@ -21,7 +21,15 @@ class WorldGrid {
     return false;
   }
 
-  public static function addStaticObject(object: Object, size: Size) {
+  public static function addStaticObject(object: Object, size: Size, ?debug: Bool) {
+    if (debug) {
+      var debugDisplay = new h2d.Bitmap(
+        h2d.Tile.fromColor(0x8934eb, Std.int(size.w), Std.int(size.h), 1),
+        Main.scene
+      );
+      debugDisplay.x = object.x - (size.w / 2);
+      debugDisplay.y = object.y - (size.h / 2);
+    }
     var startingColumn = Math.floor((object.x - (size.w / 2)) / CELL_SIZE);
     var endingColumn   = Math.floor((object.x + (size.w / 2)) / CELL_SIZE);
     var startingRow    = Math.floor((object.y - (size.h / 2)) / CELL_SIZE);

@@ -1,0 +1,8 @@
+view {
+  padding: 20;
+  background: #ff0000;
+}
+
+view.thing {
+  color: #ff0000;
+}

@@ -1,8 +1,10 @@
+import entities.resources.Tree;
 import h2d.Layers;
 import hxd.Window;
 import common.OrderHandler;
 import common.DroneScheduler;
 import common.GroundRenderer;
+import common.BuildSelector;
 import entities.Drone;
 import common.InputManager;
 import entities.Girl;
@@ -15,10 +17,12 @@ var layerIndexes = {
 
 class Main extends hxd.App {
   static inline var BLOCK_SIZE = 32;
+  static inline var LAYER_SORT_TIMER = 0.3;
 
   public static var scene: h2d.Scene;
   public static var girl: Girl;
   public static var layers: Layers;
+  var lastLayerSort = 0.;
 
   var devMode = false;
   var dragging = false;
@@ -42,6 +46,22 @@ class Main extends hxd.App {
 
     // GROUND
     GroundRenderer.renderGround();
+
+    // UI
+    BuildSelector.init();
+
+    // GRASS
+    var grass = new h2d.Bitmap(
+      h2d.Tile.fromColor(0x689e5a, 10000, 10000, 1),
+      Main.scene
+    );
+    grass.x -= 10000 / 2;
+    grass.y -= 10000 / 2;
+    layers.add(grass, layerIndexes.GROUND);
+
+    // TREE
+    var tree = new Tree({ x: 128, y: 128 });
+    layers.add(tree, layerIndexes.ON_GROUND);
 
     // GIRL
     girl = new Girl(0, 0);
@@ -116,6 +136,13 @@ class Main extends hxd.App {
   }
 
   override function update(dt:Float) {
+    // TODO: Fix this
+    lastLayerSort += dt;
+    if (lastLayerSort > LAYER_SORT_TIMER) {
+      layers.ysort(layerIndexes.ON_GROUND);
+      lastLayerSort = 0;
+    }
+
     DroneScheduler.updateDrones(dt);
     girl.update(dt);
     

@@ -24,7 +24,6 @@ class DroneScheduler {
   public static function init() {
     var font : h2d.Font = hxd.res.DefaultFont.get();
     droneCount = new Text(font, Main.girl);
-    droneCount.text = "AAAAA";
     droneCount.x = -Main.scene.width / 2;
     droneCount.y = -Main.scene.height / 2 + 30;
   }
