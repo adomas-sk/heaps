@@ -10,154 +10,153 @@ import common.InputManager;
 import entities.Girl;
 import h2d.Bitmap;
 
-var layerIndexes = {
-  GROUND: 0,
-  ON_GROUND: 1,
-};
+enum abstract LayerIndexes(Int) to Int {
+	var GROUND;
+	var ON_GROUND;
+	var BUILD_INDICATOR;
+	var UI;
+}
 
 class Main extends hxd.App {
-  static inline var BLOCK_SIZE = 32;
-  static inline var LAYER_SORT_TIMER = 0.3;
+	static inline var BLOCK_SIZE = 32;
+	static inline var LAYER_SORT_TIMER = 0.3;
 
-  public static var scene: h2d.Scene;
-  public static var girl: Girl;
-  public static var layers: Layers;
-  var lastLayerSort = 0.;
+	public static var scene:h2d.Scene;
+	public static var girl:Girl;
+	public static var layers:Layers;
 
-  var devMode = false;
-  var dragging = false;
-  var tileName = GroundTiles.GRASS1;
-  var draggedMouseThrough = [];
+	var lastLayerSort = 0.;
 
-  var fpsText : h2d.Text;
+	var devMode = false;
+	var dragging = false;
+	var tileName = GroundTiles.GRASS1;
+	var draggedMouseThrough = [];
 
-  var square: Bitmap;
+	var fpsText:h2d.Text;
 
-  var drones: Array<Drone> = [];
+	var square:Bitmap;
 
-  override function init() {
-    // Window.getInstance().vsync = false;
-    Window.getInstance().addEventTarget(InputManager.onEvent);
-    Window.getInstance().addResizeEvent(resizeHandler);
-    scene = s2d;
+	var drones:Array<Drone> = [];
 
-    // LAYERS
-    layers = new Layers(s2d);
+	override function init() {
+		// Window.getInstance().vsync = false;
+		Window.getInstance().addEventTarget(InputManager.onEvent);
+		Window.getInstance().addResizeEvent(resizeHandler);
+		scene = s2d;
 
-    // GROUND
-    GroundRenderer.renderGround();
+		// LAYERS
+		layers = new Layers(s2d);
 
-    // UI
-    BuildSelector.init();
+		// GROUND
+		GroundRenderer.renderGround();
 
-    // GRASS
-    var grass = new h2d.Bitmap(
-      h2d.Tile.fromColor(0x689e5a, 10000, 10000, 1),
-      Main.scene
-    );
-    grass.x -= 10000 / 2;
-    grass.y -= 10000 / 2;
-    layers.add(grass, layerIndexes.GROUND);
+		// GRASS
+		var grass = new h2d.Bitmap(h2d.Tile.fromColor(0xa7da48, 10000, 10000, 0.3), Main.scene);
+		grass.x -= 10000 / 2;
+		grass.y -= 10000 / 2;
+		layers.add(grass, LayerIndexes.GROUND);
 
-    // TREE
-    var tree = new Tree({ x: 128, y: 128 });
-    layers.add(tree, layerIndexes.ON_GROUND);
+		// TREE
+		var tree = new Tree({x: 128, y: 128});
 
-    // GIRL
-    girl = new Girl(0, 0);
-    layers.add(girl, layerIndexes.ON_GROUND);
+		// GIRL
+		girl = new Girl(0, 0);
+		layers.add(girl, LayerIndexes.ON_GROUND);
 
-    // DRONES
-    DroneScheduler.init();
-    for (i in 0 ... 10) {
-      var newDrone = new Drone(girl);
-      layers.add(newDrone, layerIndexes.ON_GROUND);
-      DroneScheduler.addDrone(newDrone);
-    }
+		// UI
+		BuildSelector.init();
 
-    // CAMERA
-    s2d.interactiveCamera.follow = girl;
-    s2d.interactiveCamera.anchorX = 0.5;
-    s2d.interactiveCamera.anchorY = 0.5;
+		// DRONES
+		DroneScheduler.init();
+		for (i in 0...10) {
+			var newDrone = new Drone(girl);
+			DroneScheduler.addDrone(newDrone);
+		}
 
-    // CONTROL
-    OrderHandler.init();
+		// CAMERA
+		s2d.interactiveCamera.follow = girl;
+		s2d.interactiveCamera.anchorX = 0.5;
+		s2d.interactiveCamera.anchorY = 0.5;
 
-    // DEVMODE
-    InputManager.registerEventHandler("devmode", InputName.bslash, (repeat: Bool) -> {
-      devMode = true;
-      InputManager.registerEventHandler("devmode", InputName.num1, (repeat: Bool) -> {
-        tileName = GroundTiles.GRASS1;
-      });
-      InputManager.registerEventHandler("devmode", InputName.num2, (repeat: Bool) -> {
-        tileName = GroundTiles.GRASS2;
-      });
-      InputManager.registerEventHandler("devmode", InputName.num3, (repeat: Bool) -> {
-        tileName = GroundTiles.GRASS3;
-      });
-      InputManager.registerEventHandler("devmode", InputName.num4, (repeat: Bool) -> {
-        tileName = GroundTiles.ROADL;
-      });
-      InputManager.registerEventHandler("devmode", InputName.num5, (repeat: Bool) -> {
-        tileName = GroundTiles.ROADLB;
-      });
-      InputManager.registerEventHandler("devmode", InputName.num6, (repeat: Bool) -> {
-        tileName = GroundTiles.ROAD;
-      });
-      InputManager.registerEventHandler("devmode", InputName.mouseL, (repeat: Bool) -> {
-        if (!repeat) {
-          var newCell = square.x + ":" + square.y;
-          draggedMouseThrough.push(newCell);
-          GroundRenderer.addTile(square.x, square.y, tileName);
-          dragging = true;
-        }
-      });
-      InputManager.registerReleaseEventHandler("devmode", InputName.mouseL, () -> {
-        dragging = false;
-      });
-      InputManager.registerChangeEventHandler("devmode", InputName.mouseMove, (event: hxd.Event) -> {
-        if (dragging) {
-          var newCell = square.x + ":" + square.y;
-          if (draggedMouseThrough.contains(newCell)) {
-            return;
-          }
-          draggedMouseThrough.push(newCell);
-          GroundRenderer.addTile(square.x, square.y, tileName);
-        }
-      });
-    });
+		// CONTROL
+		OrderHandler.init();
 
-    // FPS
-    var font : h2d.Font = hxd.res.DefaultFont.get();
-    fpsText = new h2d.Text(font, s2d);
-    fpsText.text = "";
-    fpsText.x = 0;
-    fpsText.y = 0;
-  }
+		// DEVMODE
+		InputManager.registerEventHandler("devmode", InputName.bslash, (repeat:Bool) -> {
+			devMode = true;
+			InputManager.registerEventHandler("devmode", InputName.num1, (repeat:Bool) -> {
+				tileName = GroundTiles.GRASS1;
+			});
+			InputManager.registerEventHandler("devmode", InputName.num2, (repeat:Bool) -> {
+				tileName = GroundTiles.GRASS2;
+			});
+			InputManager.registerEventHandler("devmode", InputName.num3, (repeat:Bool) -> {
+				tileName = GroundTiles.GRASS3;
+			});
+			InputManager.registerEventHandler("devmode", InputName.num4, (repeat:Bool) -> {
+				tileName = GroundTiles.ROADL;
+			});
+			InputManager.registerEventHandler("devmode", InputName.num5, (repeat:Bool) -> {
+				tileName = GroundTiles.ROADLB;
+			});
+			InputManager.registerEventHandler("devmode", InputName.num6, (repeat:Bool) -> {
+				tileName = GroundTiles.ROAD;
+			});
+			InputManager.registerEventHandler("devmode", InputName.mouseL, (repeat:Bool) -> {
+				if (!repeat) {
+					var newCell = square.x + ":" + square.y;
+					draggedMouseThrough.push(newCell);
+					GroundRenderer.addTile(square.x, square.y, tileName);
+					dragging = true;
+				}
+			});
+			InputManager.registerReleaseEventHandler("devmode", InputName.mouseL, () -> {
+				dragging = false;
+			});
+			InputManager.registerChangeEventHandler("devmode", InputName.mouseMove, (event:hxd.Event) -> {
+				if (dragging) {
+					var newCell = square.x + ":" + square.y;
+					if (draggedMouseThrough.contains(newCell)) {
+						return;
+					}
+					draggedMouseThrough.push(newCell);
+					GroundRenderer.addTile(square.x, square.y, tileName);
+				}
+			});
+		});
 
-  override function update(dt:Float) {
-    // TODO: Fix this
-    lastLayerSort += dt;
-    if (lastLayerSort > LAYER_SORT_TIMER) {
-      layers.ysort(layerIndexes.ON_GROUND);
-      lastLayerSort = 0;
-    }
+		// FPS
+		var font:h2d.Font = hxd.res.DefaultFont.get();
+		fpsText = new h2d.Text(font, s2d);
+		fpsText.text = "";
+		fpsText.x = 0;
+		fpsText.y = 0;
+	}
 
-    DroneScheduler.updateDrones(dt);
-    girl.update(dt);
-    
-    var fps = Std.int(hxd.Timer.fps());
-    fpsText.text = '$fps';
-    fpsText.x = girl.x - s2d.width / 2;
-    fpsText.y = girl.y - s2d.height / 2;
-  }
+	override function update(dt:Float) {
+		// TODO: Fix this
+		lastLayerSort += dt;
+		if (lastLayerSort > LAYER_SORT_TIMER) {
+			layers.ysort(LayerIndexes.ON_GROUND);
+			lastLayerSort = 0;
+		}
 
-  static function resizeHandler() {
-    DroneScheduler.resizeHandler();
-  }
+		DroneScheduler.updateDrones(dt);
+		girl.update(dt);
+		BuildSelector.update();
 
-  static function main() {
-    hxd.Res.initLocal();
-    new Main();
-  }
+		var fps = Std.int(hxd.Timer.fps());
+		fpsText.text = '$fps';
+		fpsText.x = girl.x - s2d.width / 2;
+		fpsText.y = girl.y - s2d.height / 2;
+	}
+
+	static function resizeHandler() {
+		DroneScheduler.resizeHandler();
+	}
+
+	static function main() {
+		hxd.Res.initLocal();
+		new Main();
+	}
 }

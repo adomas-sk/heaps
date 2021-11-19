@@ -1,8 +1,22 @@
-view {
-  padding: 20;
-  background: #ff0000;
+button {
+  height: 64;
+  width: 64;
+  layout: vertical;
+  fill-width: true;
+  padding: 16;
+  background: #424141;
+  
 }
 
-view.thing {
-  color: #ff0000;
+button:hover {
+  background: #626262;
+}
+
+button:active {
+  background: #262525;
+}
+
+button text {
+  align: middle middle;
+  color: #fff;
 }
