@@ -1,6 +1,6 @@
 package entities.resources;
 
-import common.BuildingTypes.BuildFunctionReturn;
+import helpers.BuildingTypes.BuildFunctionReturn;
 import Main.LayerIndexes;
 import common.WorldGrid;
 import h2d.Bitmap;

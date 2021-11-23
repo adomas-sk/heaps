@@ -1,9 +1,9 @@
 package entities.buildings;
 
 import Main.LayerIndexes;
-import common.Animation;
+import helpers.Animation;
 import common.WorldGrid.Position;
-import common.BuildingTypes.BuildFunctionReturn;
+import helpers.BuildingTypes.BuildFunctionReturn;
 import h2d.Anim;
 import h2d.Object;
 
@@ -27,7 +27,7 @@ class Drill extends Object {
 
 	public function new(position:Position) {
 		super(Main.scene);
-		Main.layers.add(this, LayerIndexes.GROUND);
+		Main.layers.add(this, LayerIndexes.ON_GROUND);
 
 		animationLoader = new DrillAnimation(DrillAnimation.SPRITE_SIZE);
 		animation = new Anim(animationLoader.animations[DrillAnimations.WORKING], 8, this);

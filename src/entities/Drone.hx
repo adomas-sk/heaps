@@ -1,7 +1,7 @@
 package entities;
 
 import Main.LayerIndexes;
-import common.Animation;
+import helpers.Animation;
 import common.DroneScheduler;
 import common.DroneScheduler.DroneOrder;
 import h3d.Vector;

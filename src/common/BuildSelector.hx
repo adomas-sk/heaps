@@ -1,7 +1,7 @@
 package common;
 
-import common.BuildingTypes.Buildings;
-import common.BuildingTypes.BuildingsMap;
+import helpers.BuildingTypes.Buildings;
+import helpers.BuildingTypes.BuildingsMap;
 import h2d.domkit.Object;
 import Main.LayerIndexes;
 
@@ -20,11 +20,9 @@ class BuildSelector {
 		container.button2.icon.tile = h2d.Tile.fromColor(0x3be68b, 32, 32, 0.5);
 		container.button2.onClick = createButtonHandler(Buildings.TREE);
 
-		container.button3.label = "B3";
+		container.button3.label = "Turret";
 		container.button3.icon.tile = h2d.Tile.fromColor(0xffffff, 32, 32, 0.5);
-		container.button3.onClick = () -> {
-			trace("BUTTON3");
-		}
+		container.button3.onClick = createButtonHandler(Buildings.TURRET);
 
 		container.button1.onClick();
 		var style = new h2d.domkit.Style();

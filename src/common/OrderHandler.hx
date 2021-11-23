@@ -1,8 +1,8 @@
 package common;
 
-import common.BuildingTypes.BuildFunctionReturn;
-import common.BuildingTypes.BuildIndicator;
-import common.BuildingTypes.BuildIndicatorInfo;
+import helpers.BuildingTypes.BuildFunctionReturn;
+import helpers.BuildingTypes.BuildIndicator;
+import helpers.BuildingTypes.BuildIndicatorInfo;
 import common.WorldGrid.Position;
 import Main.LayerIndexes;
 import common.WorldGrid.Cell;

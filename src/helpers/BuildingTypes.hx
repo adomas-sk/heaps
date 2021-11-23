@@ -1,5 +1,6 @@
-package common;
+package helpers;
 
+import entities.buildings.Turret;
 import entities.resources.Tree;
 import entities.buildings.Drill;
 import common.WorldGrid.Position;
@@ -7,6 +8,7 @@ import common.WorldGrid.Position;
 enum Buildings {
 	DRILL;
 	TREE;
+	TURRET;
 }
 
 typedef BuildFunctionReturn = {
@@ -26,6 +28,10 @@ var BuildingsMap:Map<Buildings, BuildingConfig> = [
 	},
 	Buildings.TREE => {
 		buildFunction: (position:Position) -> Tree.build(position),
+		buildIndicator: {w: 32, h: 32},
+	},
+	Buildings.TURRET => {
+		buildFunction: (position:Position) -> Turret.build(position),
 		buildIndicator: {w: 32, h: 32},
 	}
 ];

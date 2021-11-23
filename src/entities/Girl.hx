@@ -1,6 +1,6 @@
 package entities;
 
-import common.Animation;
+import helpers.Animation;
 import h3d.Vector;
 import common.InputManager;
 import common.WorldGrid;
