@@ -120,6 +120,7 @@ class Turret extends Object implements IKillable {
 		return new Vector(x, y);
 	}
 
+	// TODO: handle damage and death
 	public function onDamage(damage: Int) {
 		trace("TURRET GETTING DAMAGED: " + damage);
 	}

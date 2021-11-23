@@ -24,6 +24,7 @@ enum EnemyActions {
 	DYING;
 }
 
+// TODO: add actual sprites and death animation
 class EnemyAnimation extends Animation<EnemyAnimations> {
 	public static var SPRITE_SIZE = 32;
 
@@ -38,10 +39,6 @@ class EnemyAnimation extends Animation<EnemyAnimations> {
 			spritePreProcess(h2d.Tile.fromColor(0x992222, SPRITE_SIZE, SPRITE_SIZE), 0, 0, SPRITE_SIZE)
 		];
 	}
-}
-
-interface IAAA {
-	function aaa():Void;
 }
 
 class Enemy extends Object implements IKillable {

@@ -91,6 +91,7 @@ class Main extends hxd.App {
 			lastLayerSort = 0;
 		}
 
+		// TODO: Add centralised update manager
 		DroneScheduler.updateDrones(dt);
 		girl.update(dt);
 		Killables.update(dt);
