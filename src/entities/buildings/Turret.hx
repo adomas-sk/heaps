@@ -17,6 +17,11 @@ enum abstract TurretAnimations(Int) to Int {
 	var FIRING_R;
 }
 
+enum Side {
+	Left;
+	Right;
+}
+
 class TurretAnimation extends Animation<TurretAnimations> {
 	public static inline var SPRITE_SIZE = 32;
 
@@ -36,13 +41,14 @@ enum TurretActions {
 }
 
 class Turret extends Object implements IKillable {
-	static var REACH = 400;
+	static var REACH = 200;
 	static var FIRE_SPEED = 0.1;
 	static var DAMAGE = 5;
 
 	var animationLoader:Animation<TurretAnimations>;
 	var animation:Anim;
 	var action: TurretActions = TurretActions.IDLE;
+	var side:Side = Side.Right;
 
 	var trackingTarget: Null<IKillable>;
 
@@ -73,8 +79,17 @@ class Turret extends Object implements IKillable {
 				case TurretActions.IDLE: {
 					var target = getTarget();
 					if (target != null) {
+						{
+							var target: Dynamic = target;
+							var direction = Helpers.getDirectionToObject(this, target);
+							if (direction.x > 0 && side != Side.Right) {
+								side = Side.Right;
+							} else if (direction.x < 0 && side != Side.Left) {
+								side = Side.Left;
+							}
+						}
 						action = TurretActions.FIRING;
-						animation.play(animationLoader.animations[TurretAnimations.FIRING_R]);
+						animation.play(animationLoader.animations[side == Side.Right ? TurretAnimations.FIRING_R : TurretAnimations.FIRING_L]);
 						trackingTarget = target;
 					}
 				}
@@ -82,7 +97,7 @@ class Turret extends Object implements IKillable {
 					var distance = Helpers.getDistanceBetweenObjectAndVector(this, trackingTarget.getPosition());
 					if (distance > REACH || trackingTarget.health <= 0) {
 						action = TurretActions.IDLE;
-						animation.play(animationLoader.animations[TurretAnimations.IDLE_R]);
+						animation.play(animationLoader.animations[side == Side.Right ? TurretAnimations.IDLE_R : TurretAnimations.IDLE_L]);
 						trackingTarget = null;
 					}
 				}

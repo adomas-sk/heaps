@@ -24,13 +24,11 @@ abstract class Animation<Animations:Int> {
 
 	function spritePreProcess(image:h2d.Tile, x:Int, y:Int, size:Int, ?options:PreProcessOptions) {
 		var tile = image.sub(x, y, ANIMATION_SPRITE_SIZE, ANIMATION_SPRITE_SIZE);
+		tile.dx -= ANIMATION_SPRITE_SIZE / 2;
+		tile.dy -= ANIMATION_SPRITE_SIZE / 2;
 		if (options != null && options.flipX) {
 			tile.flipX();
-			tile.dx -= ANIMATION_SPRITE_SIZE / 4;
-		} else {
-			tile.dx -= ANIMATION_SPRITE_SIZE / 2;
 		}
-		tile.dy -= ANIMATION_SPRITE_SIZE / 2;
 		return tile;
 	}
 }

@@ -45,6 +45,7 @@ class Enemy extends Object implements IKillable {
 	static inline var REACH = 100;
 	static inline var SIGHT = 200;
 	static inline var SPEED = 50;
+	static inline var MAX_HEALTH = 1000;
 
 	var animationLoader:Animation<EnemyAnimations>;
 	var animation:Anim;
@@ -53,7 +54,8 @@ class Enemy extends Object implements IKillable {
 	var destination:Null<Position>;
 	var following:Null<Object>;
 
-	public var health = 100;
+	public var health = 1000;
+	public var healthBar: h2d.Bitmap;
 
 	public function new(position:Position) {
 		super(Main.scene);
@@ -63,6 +65,12 @@ class Enemy extends Object implements IKillable {
 		animationLoader = new EnemyAnimation(EnemyAnimation.SPRITE_SIZE);
 		animation = new Anim(animationLoader.animations[EnemyAnimations.IDLE], 1, this);
 		new h2d.Bitmap(h2d.Tile.fromColor(0xff4589, 1, 1, 1), animation);
+
+		healthBar = new h2d.Bitmap(h2d.Tile.fromColor(0xdd4565, 32, 4), animation);
+		healthBar.y -= 16 + 8;
+		healthBar.x -= 16;
+		healthBar.height = 4;
+		healthBar.width = 32;
 
 		Main.layers.add(this, LayerIndexes.ON_GROUND);
 		Killables.registerKillable(this, KillablesTag.ENEMY);
@@ -125,6 +133,7 @@ class Enemy extends Object implements IKillable {
 
 	public function onDamage(damage:Int) {
 		health -= damage;
+		healthBar.width = 32 * (health / MAX_HEALTH);
 		if (health <= 0) {
 			onDeath();
 		}
