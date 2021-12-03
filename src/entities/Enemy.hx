@@ -21,7 +21,6 @@ enum EnemyActions {
 	IDLE;
 	FOLLOWING;
 	ATTACKING;
-	DYING;
 }
 
 // TODO: add actual sprites and death animation
@@ -114,10 +113,6 @@ class Enemy extends Object implements IKillable {
 						return;
 					}
 				}
-			case EnemyActions.DYING:
-				{
-					return;
-				}
 		}
 	}
 
@@ -141,6 +136,7 @@ class Enemy extends Object implements IKillable {
 
 	public function onDeath() {
 		Killables.announceDead(this);
+		this.remove();
 	}
 
 	public function getPosition() {

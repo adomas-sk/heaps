@@ -1,5 +1,6 @@
 package common;
 
+import hxd.Res;
 import helpers.BuildingTypes.BuildFunctionReturn;
 import helpers.BuildingTypes.BuildIndicator;
 import helpers.BuildingTypes.BuildIndicatorInfo;
@@ -27,12 +28,16 @@ class OrderHandler {
 		wOffset: 0,
 	};
 
+	static var dropSound: hxd.res.Sound;
+	static var popSound: hxd.res.Sound;
 	static var currentOrderType:Null<DroneOrderTypes> = null;
 
 	static var buildings:Map<String, Object> = [];
 
 	public static function init() {
 		setSquare({w: 64, h: 64});
+		dropSound = Res.sound_fx.drop_building;
+		popSound = Res.sound_fx.pop_building;
 		InputManager.registerChangeEventHandler("building-square", InputName.mouseMove, (event:hxd.Event) -> {
 			var cell = getCell(true);
 
@@ -124,6 +129,7 @@ class OrderHandler {
 		addBuildings(cell, build.object);
 
 		return () -> {
+			dropSound.play(false, 0.6);
 			build.onBuild();
 			WorldGrid.addStaticObject(build.object, {h: buildIndicatorInfo.h, w: buildIndicatorInfo.w});
 		};
@@ -142,6 +148,7 @@ class OrderHandler {
 
 		removeBuildings(cell);
 		return () -> {
+			popSound.play(false, 0.6);
 			removalIndicator.remove();
 			building.remove();
 			WorldGrid.removeStaticObject(building, {h: buildIndicatorInfo.h, w: buildIndicatorInfo.w});

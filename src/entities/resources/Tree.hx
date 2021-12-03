@@ -12,7 +12,7 @@ class Tree extends Object {
 		super(Main.scene);
 		Main.layers.add(this, LayerIndexes.ON_GROUND);
 
-		var image = hxd.Res.tree.tree.toTile();
+		var image = hxd.Res.tree.tree2.toTile();
 		image.dx -= image.width / 2;
 		image.dy -= image.height - 32;
 		new Bitmap(image, this);

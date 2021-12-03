@@ -1,5 +1,6 @@
 package entities.buildings;
 
+import hxd.Res;
 import helpers.BuildingTypes.BuildFunctionReturn;
 import helpers.Helpers;
 import h3d.Vector;
@@ -50,6 +51,8 @@ class Turret extends Object implements IKillable {
 	var action: TurretActions = TurretActions.IDLE;
 	var side:Side = Side.Right;
 
+	var shotSound: hxd.res.Sound;
+
 	var trackingTarget: Null<IKillable>;
 
 	public var health = 10;
@@ -57,11 +60,13 @@ class Turret extends Object implements IKillable {
 	public function new(position: Position) {
 		super(Main.scene);
 		Main.layers.add(this, LayerIndexes.ON_GROUND);
+		shotSound = Res.turret.shot;
 
 		animationLoader = new TurretAnimation(TurretAnimation.SPRITE_SIZE);
 		animation = new Anim(animationLoader.animations[TurretAnimations.IDLE_R], 8, this);
 		animation.onAnimEnd = () -> {
 			if (action == TurretActions.FIRING) {
+				shotSound.play(false, 0.3);
 				trackingTarget.onDamage(DAMAGE);
 			}
 		};

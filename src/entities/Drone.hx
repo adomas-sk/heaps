@@ -48,6 +48,8 @@ class Drone extends Object {
 	var animation:Anim;
 	var action:DroneActions;
 
+	var channel : hxd.snd.Channel;
+
 	var currentOrder:Null<DroneOrder>;
 	var source:Object;
 
@@ -58,6 +60,11 @@ class Drone extends Object {
 		x = 0;
 		y = 0;
 		action = DroneActions.IDLE;
+
+		var flyingSound = hxd.Res.drone.drone_flying;
+		channel = flyingSound.play(true);
+		channel.volume = 0.;
+		channel.pause = true;
 
 		animationLoader = new DroneAnimation(DroneAnimation.SPRITE_SIZE);
 		animation = new Anim(animationLoader.animations[DroneAnimations.COMING_OUT], 10, this);
@@ -79,6 +86,7 @@ class Drone extends Object {
 						animation.play(animationLoader.animations[DroneAnimations.COMING_OUT]);
 						animation.visible = false;
 						animation.pause = true;
+						channel.fadeTo(0., 0.4, () -> {channel.pause = true;});
 					}
 				case DroneActions.IDLE:
 					throw new haxe.Exception("Drone: animation ended in IDLE");
@@ -119,6 +127,8 @@ class Drone extends Object {
 		action = DroneActions.COMING_OUT;
 		animation.visible = true;
 		animation.pause = false;
+		channel.pause = false;
+		channel.fadeTo(0.2, 0.4);
 	}
 
 	function deliver(dt:Float) {

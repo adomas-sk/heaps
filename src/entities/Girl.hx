@@ -50,9 +50,11 @@ class Girl extends Object {
 	var velocity = {x: 0., y: 0.};
 	var lookingRight = false;
 	var controlling = 0;
+	var steps: hxd.snd.Channel;
 
 	public function new(x:Float, y:Float) {
 		super(Main.scene);
+		steps = hxd.Res.girl.steps.play(true, 0.6);
 		this.x = x;
 		this.y = y;
 
@@ -68,8 +70,10 @@ class Girl extends Object {
 			velocity = {x: 0., y: 0.};
 		}
 		if (Math.abs(velocity.x) < 0.1 && Math.abs(velocity.y) < 0.1) {
+			steps.volume = 0.;
 			return;
 		}
+		steps.volume = 0.6;
 		var nextPos = WorldGrid.getNextPosition({x: x, y: y}, {x: velocity.x * dt, y: velocity.y * dt});
 		x = nextPos.x;
 		y = nextPos.y;

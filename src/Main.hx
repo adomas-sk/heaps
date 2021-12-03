@@ -55,7 +55,12 @@ class Main extends hxd.App {
 		layers.add(girl, LayerIndexes.ON_GROUND);
 
 		// ENEMY
-		new Enemy({ x: 0, y: 0 });
+		// new Enemy({ x: 0, y: 0 });
+		// new Enemy({ x: 100, y: 0 });
+		// new Enemy({ x: 0, y: 100 });
+		// new Enemy({ x: 0, y: -100 });
+		// new Enemy({ x: -100, y: 0 });
+		new Enemy({ x: 100, y: -100 });
 
 		// UI
 		BuildSelector.init();
