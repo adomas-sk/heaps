@@ -19,12 +19,14 @@ interface IKillable extends IHealth extends ITarget {
 enum abstract KillablesTag(Int) to Int {
 	var ENEMY;
 	var TURRET;
+	var PLAYER;
 }
 
 class Killables {
 	static var killables:Map<KillablesTag, Array<IKillable>> = [
 		KillablesTag.ENEMY => [],
 		KillablesTag.TURRET => [],
+		KillablesTag.PLAYER => [],
 	];
 
 	public static function registerKillable(killable: IKillable, tag: KillablesTag) {

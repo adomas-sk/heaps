@@ -1,5 +1,9 @@
 package entities;
 
+import shared.Health;
+import common.Killables;
+import common.Killables.KillablesTag;
+import common.Killables.IKillable;
 import helpers.Animation;
 import h3d.Vector;
 import common.InputManager;
@@ -41,8 +45,9 @@ class GirlAnimation extends Animation<GirlAnimations> {
 	}
 }
 
-class Girl extends Object {
+class Girl extends Object implements IKillable {
 	static inline var SPEED = 75;
+	static inline var MAX_HEALTH = 200;
 
 	var animationLoader:Animation<GirlAnimations>;
 	var animation:Anim;
@@ -51,6 +56,9 @@ class Girl extends Object {
 	var lookingRight = false;
 	var controlling = 0;
 	var steps: hxd.snd.Channel;
+
+	public var health = 200;
+	var healthBar: Health;
 
 	public function new(x:Float, y:Float) {
 		super(Main.scene);
@@ -61,8 +69,10 @@ class Girl extends Object {
 		animationLoader = new GirlAnimation(GirlAnimation.SPRITE_SIZE);
 		animation = new Anim(animationLoader.animations[GirlAnimations.IDLE_L], 8, this);
 		new h2d.Bitmap(h2d.Tile.fromColor(0xff4589, 4, 4, 1), animation);
+		healthBar = new Health(this, { x: 16, y: -32 });
 
 		registerInput();
+		Killables.registerKillable(this, KillablesTag.PLAYER);
 	}
 
 	public function update(dt:Float) {
@@ -164,5 +174,22 @@ class Girl extends Object {
 			controlling -= 1;
 			updatesAfterInputChanges();
 		});
+	}
+
+	public function onDamage(damage: Int) {
+		health -= damage;
+		healthBar.setHealth(health / MAX_HEALTH);
+		if (health <= 0) {
+			health = 0;
+			onDeath();
+		}
+	}
+	function onDeath() {
+		trace("Girl got ded");
+		Killables.announceDead(this);
+	}
+
+	public function getPosition():Vector {
+		return new Vector(x, y);
 	}
 }
