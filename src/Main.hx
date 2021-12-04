@@ -61,7 +61,7 @@ class Main extends hxd.App {
 
 		// DRONES
 		DroneScheduler.init();
-		for (i in 0...10) {
+		for (i in 0...20) {
 			var newDrone = new Drone(girl);
 			DroneScheduler.addDrone(newDrone);
 		}

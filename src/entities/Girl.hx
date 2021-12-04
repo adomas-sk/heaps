@@ -68,7 +68,7 @@ class Girl extends Object implements IKillable {
 
 		animationLoader = new GirlAnimation(GirlAnimation.SPRITE_SIZE);
 		animation = new Anim(animationLoader.animations[GirlAnimations.IDLE_L], 8, this);
-		new h2d.Bitmap(h2d.Tile.fromColor(0xff4589, 4, 4, 1), animation);
+		// new h2d.Bitmap(h2d.Tile.fromColor(0xff4589, 4, 4, 1), animation);
 		healthBar = new Health(this, { x: 16, y: -32 });
 
 		registerInput();
