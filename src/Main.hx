@@ -1,3 +1,4 @@
+import common.Loader;
 import hxd.Window;
 import h2d.Layers;
 import h2d.Bitmap;
@@ -8,9 +9,7 @@ import common.DroneScheduler;
 import common.BuildSelector;
 import common.InputManager;
 
-import entities.resources.Tree;
 import entities.Drone;
-import entities.Enemy;
 import entities.Girl;
 
 enum abstract LayerIndexes(Int) to Int {
@@ -48,19 +47,14 @@ class Main extends hxd.App {
 		layers.add(grass, LayerIndexes.GROUND);
 
 		// TREE
-		var tree = new Tree({x: 128, y: 128});
+		// var tree = new Tree({x: 128, y: 128});
+
+		// LOAD
+		Loader.load();
 
 		// GIRL
 		girl = new Girl(0, 0);
 		layers.add(girl, LayerIndexes.ON_GROUND);
-
-		// ENEMY
-		// new Enemy({ x: 0, y: 0 });
-		// new Enemy({ x: 100, y: 0 });
-		// new Enemy({ x: 0, y: 100 });
-		// new Enemy({ x: 0, y: -100 });
-		// new Enemy({ x: -100, y: 0 });
-		new Enemy({ x: 100, y: -100 });
 
 		// UI
 		BuildSelector.init();

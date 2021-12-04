@@ -1,5 +1,6 @@
 package common;
 
+import helpers.BuildingTypes.BuildingInfo;
 import hxd.Res;
 import helpers.BuildingTypes.BuildFunctionReturn;
 import helpers.BuildingTypes.BuildIndicator;
@@ -19,6 +20,7 @@ class OrderHandler {
 
 	public static var disabled = false;
 	public static var buildFunction:(position:Position) -> BuildFunctionReturn;
+	public static var buildName:String = "default";
 
 	static var buildIndicator:Bitmap;
 	static var buildIndicatorInfo:BuildIndicatorInfo = {
@@ -32,14 +34,14 @@ class OrderHandler {
 	static var popSound: hxd.res.Sound;
 	static var currentOrderType:Null<DroneOrderTypes> = null;
 
-	static var buildings:Map<String, Object> = [];
+	static var buildings:Map<String, BuildingInfo> = [];
 
 	public static function init() {
 		setSquare({w: 64, h: 64});
 		dropSound = Res.sound_fx.drop_building;
 		popSound = Res.sound_fx.pop_building;
 		InputManager.registerChangeEventHandler("building-square", InputName.mouseMove, (event:hxd.Event) -> {
-			var cell = getCell(true);
+			var cell = getMouseCell(true);
 
 			buildIndicator.x = cell.x * BLOCK_SIZE;
 			buildIndicator.y = cell.y * BLOCK_SIZE;
@@ -61,6 +63,41 @@ class OrderHandler {
 			buildIndicator.alpha = 1;
 
 			currentOrderType = null;
+		});
+		InputManager.registerEventHandler("order-dump-buildings", InputName.bslash, (repeat:Bool) -> {
+			trace("ALL BUILDING ----");
+
+			var dump: Map<String, { x:Float, y:Float }> = [];
+			var intemediateDump: Map<String, Array<String>> = [];
+			var foundBuildings = [];
+			var count = 0;
+			for (key in buildings.keys()) {
+				if (buildings[key] != null) {
+					var building = buildings[key].building;
+					if (!foundBuildings.contains(building)) {
+						foundBuildings.push(building);
+						count += 1;
+						var id = buildings[key].name + ":" + count;
+						intemediateDump[id] = [];
+						for (key in buildings.keys()) {
+							if (buildings[key] != null && buildings[key].building == building) {
+								intemediateDump[id].push(key);
+							}
+						}
+						var x = Math.POSITIVE_INFINITY;
+						var y = Math.POSITIVE_INFINITY;
+						for (locations in intemediateDump[id]) {
+							var locationX = Std.parseInt(locations.split(":")[0]);
+							x = locationX < x ? locationX : x;
+							var locationY = Std.parseInt(locations.split(":")[1]);
+							y = locationY < y ? locationY : y;
+						}
+						dump[id] = { x:x, y:y };
+					}
+				}
+			}
+			trace(haxe.Json.stringify(dump));
+			trace("---- ALL BUILDING END");
 		});
 
 		InputManager.registerEventHandler("order-handler-mouseR", InputName.mouseR, (repeat:Bool) -> {
@@ -90,11 +127,34 @@ class OrderHandler {
 		Main.layers.add(buildIndicator, LayerIndexes.BUILD_INDICATOR);
 	}
 
+	// TODO: copy pasted code with minor changes. Refactor
+	public static function instantDeliveryOrder(cell: Cell, name: String, buildSize: BuildIndicator, buildFunction:(position:Position) -> BuildFunctionReturn) {
+		var buildSpace = {x: cell.x * BLOCK_SIZE, y: cell.y * BLOCK_SIZE};
+		var newBuildingX = buildSpace.x + buildSize.w / 2;
+		var newBuildingY = buildSpace.y + buildSize.h / 2;
+		var build = buildFunction({x: newBuildingX, y: newBuildingY});
+
+		var cols = Math.round(buildSize.w / BLOCK_SIZE);
+		var rows = Math.round(buildSize.h / BLOCK_SIZE);
+
+		for (col in 0...cols) {
+			for (row in 0...rows) {
+				buildings[(cell.x + col) + ":" + (cell.y + row)] = {
+					building: build.object,
+					name: name,
+				};
+			}
+		}
+
+		build.onBuild();
+		WorldGrid.addStaticObject(build.object, {h: buildSize.h, w: buildSize.w});
+	}
+
 	static function createOrder(orderType:DroneOrderTypes) {
 		switch (orderType) {
 			case DroneOrderTypes.DELIVER:
 				{
-					var cell = getCell(true);
+					var cell = getMouseCell(true);
 					if (!isBuildingSpaceFree(cell)) {
 						return;
 					}
@@ -109,13 +169,13 @@ class OrderHandler {
 				}
 			case DroneOrderTypes.RETRIEVE:
 				{
-					var cell = getCell();
+					var cell = getMouseCell();
 					var buildingInCell = buildings[cell.x + ":" + cell.y];
-					if (buildingInCell != null && buildingInCell.alpha > 0.99) {
+					if (buildingInCell != null && buildingInCell.building.alpha > 0.99) {
 						DroneScheduler.addOrder({
-							location: new Vector(buildingInCell.x, buildingInCell.y),
+							location: new Vector(buildingInCell.building.x, buildingInCell.building.y),
 							type: orderType,
-							callBack: createRetrieveCallback(buildingInCell)
+							callBack: createRetrieveCallback(buildingInCell.building)
 						});
 					}
 				}
@@ -125,8 +185,8 @@ class OrderHandler {
 	static function createDeliverCallback(buildingX:Float, buildingY:Float) {
 		var build = buildFunction({x: buildingX, y: buildingY});
 
-		var cell = getCell(true);
-		addBuildings(cell, build.object);
+		var cell = getMouseCell(true);
+		addBuildings(cell, build.object, buildName);
 
 		return () -> {
 			dropSound.play(false, 0.6);
@@ -136,7 +196,7 @@ class OrderHandler {
 	}
 
 	static function createRetrieveCallback(building:Object) {
-		var cell = getCell();
+		var cell = getMouseCell();
 
 		var tile = h2d.Tile.fromColor(0xfc2c03, buildIndicatorInfo.w, buildIndicatorInfo.h, 1);
 		tile.dx -= buildIndicatorInfo.w / 2;
@@ -154,21 +214,28 @@ class OrderHandler {
 			WorldGrid.removeStaticObject(building, {h: buildIndicatorInfo.h, w: buildIndicatorInfo.w});
 		};
 	}
-
-	static function getCell(?withOffset:Bool):Cell {
+	
+	static function getCell(x: Float, y: Float, ?withOffset:Bool) {
 		return {
-			x: Math.floor((Main.scene.mouseX - (withOffset ? buildIndicatorInfo.wOffset : 0)) / BLOCK_SIZE),
-			y: Math.floor((Main.scene.mouseY - (withOffset ? buildIndicatorInfo.hOffset : 0)) / BLOCK_SIZE)
+			x: Math.floor((x - (withOffset ? buildIndicatorInfo.wOffset : 0)) / BLOCK_SIZE),
+			y: Math.floor((y - (withOffset ? buildIndicatorInfo.hOffset : 0)) / BLOCK_SIZE)
 		};
 	}
 
-	static function addBuildings(cell:Cell, building:Object) {
+	static function getMouseCell(?withOffset:Bool):Cell {
+		return getCell(Main.scene.mouseX, Main.scene.mouseY, withOffset);
+	}
+
+	static function addBuildings(cell:Cell, building:Object, name: String) {
 		var cols = Math.round(buildIndicatorInfo.w / BLOCK_SIZE);
 		var rows = Math.round(buildIndicatorInfo.h / BLOCK_SIZE);
 
 		for (col in 0...cols) {
 			for (row in 0...rows) {
-				buildings[(cell.x + col) + ":" + (cell.y + row)] = building;
+				buildings[(cell.x + col) + ":" + (cell.y + row)] = {
+					building: building,
+					name: name,
+				};
 			}
 		}
 	}
@@ -188,9 +255,9 @@ class OrderHandler {
 	}
 
 	static function removeBuildings(cell:Cell) {
-		var building = buildings[cell.x + ":" + cell.y];
+		var building = buildings[cell.x + ":" + cell.y].building;
 		for (key in buildings.keys()) {
-			if (buildings[key] == building) {
+			if (buildings[key] != null && buildings[key].building == building) {
 				buildings[key] = null;
 			}
 		}

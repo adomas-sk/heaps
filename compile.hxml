@@ -2,6 +2,7 @@
 -lib heaps
 -lib domkit
 -lib hlsdl
+-lib json2object
 -hl build/main.hl
 -main Main
 -debug

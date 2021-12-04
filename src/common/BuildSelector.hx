@@ -24,6 +24,10 @@ class BuildSelector {
 		container.button3.icon.tile = h2d.Tile.fromColor(0xffffff, 32, 32, 0.5);
 		container.button3.onClick = createButtonHandler(Buildings.TURRET);
 
+		container.button4.label = "Wall";
+		container.button4.icon.tile = h2d.Tile.fromColor(0x747848, 32, 32, 0.5);
+		container.button4.onClick = createButtonHandler(Buildings.WALL);
+
 		container.button1.onClick();
 		var style = new h2d.domkit.Style();
 		style.load(hxd.Res.style);
@@ -34,6 +38,7 @@ class BuildSelector {
 		var config = BuildingsMap[building];
 		return () -> {
 			OrderHandler.buildFunction = config.buildFunction;
+			OrderHandler.buildName = config.name;
 			OrderHandler.setSquare(config.buildIndicator);
 		};
 	}
@@ -51,6 +56,7 @@ class ContainerComp extends h2d.Flow implements h2d.domkit.Object {
 			<button public id="button1" />
 			<button public id="button2" />
 			<button public id="button3" />
+			<button public id="button4" />
 		</container>
 
 	public function new(?parent) {
