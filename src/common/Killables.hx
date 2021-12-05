@@ -4,22 +4,23 @@ import haxe.ds.Map;
 import h3d.Vector;
 
 interface ITarget {
-	public function getPosition(): Vector;
+	public function getPosition():Vector;
 }
 
 interface IHealth {
-	public var health: Int;
-	public function onDamage(damage: Int): Void;
+	public var health:Int;
+	public function onDamage(damage:Int):Void;
 }
 
 interface IKillable extends IHealth extends ITarget {
-	public function update(dt: Float): Void;
+	public function update(dt:Float):Void;
 }
 
 enum abstract KillablesTag(Int) to Int {
 	var ENEMY;
 	var TURRET;
 	var PLAYER;
+	var RESOURCE;
 }
 
 class Killables {
@@ -27,19 +28,20 @@ class Killables {
 		KillablesTag.ENEMY => [],
 		KillablesTag.TURRET => [],
 		KillablesTag.PLAYER => [],
+		KillablesTag.RESOURCE => [],
 	];
 
-	public static function registerKillable(killable: IKillable, tag: KillablesTag) {
+	public static function registerKillable(killable:IKillable, tag:KillablesTag) {
 		killables[tag].push(killable);
 	}
 
-	public static function announceDead(killable: IKillable) {
+	public static function announceDead(killable:IKillable) {
 		for (tag in killables) {
 			tag.remove(killable);
 		}
 	}
 
-	public static function getClosestKillable(closestTo: Vector, tag: KillablesTag) {
+	public static function getClosestKillable(closestTo:Vector, tag:KillablesTag) {
 		var closestKillable:Null<IKillable> = null;
 		var closestDistance = Math.POSITIVE_INFINITY;
 		for (killable in killables[tag]) {
@@ -52,7 +54,7 @@ class Killables {
 		return closestKillable;
 	}
 
-	public static function update(dt: Float) {
+	public static function update(dt:Float) {
 		for (tag in killables) {
 			for (i in tag) {
 				i.update(dt);
@@ -60,4 +62,3 @@ class Killables {
 		}
 	}
 }
-

@@ -9,8 +9,8 @@ import helpers.BuildingTypes.BuildingsMap;
 import json2object.JsonParser;
 
 typedef LoadData = {
-	buildings: Map<String, Cell>,
-	enemies: Array<Position>,
+	buildings:Map<String, Cell>,
+	enemies:Array<Position>,
 }
 
 class Loader {
@@ -21,14 +21,14 @@ class Loader {
 		var data = parser.fromJson(json);
 
 		// LOAD BUILDINGS
-		for(buildingKey in data.buildings.keys()) {
+		for (buildingKey in data.buildings.keys()) {
 			var name = buildingKey.split(":")[0];
-			var cell: Cell = data.buildings[buildingKey];
-			var buildSize: Null<BuildIndicator> = null;
-			
-			var buildFunction: Null<(position:Position) -> BuildFunctionReturn> = null;
-			for(i in BuildingsMap) {
-				if(i.name == name) {
+			var cell:Cell = data.buildings[buildingKey];
+			var buildSize:Null<BuildIndicator> = null;
+
+			var buildFunction:Null<(position:Position) -> BuildFunctionReturn> = null;
+			for (i in BuildingsMap) {
+				if (i.name == name) {
 					buildSize = i.buildIndicator;
 					buildFunction = i.buildFunction;
 					break;

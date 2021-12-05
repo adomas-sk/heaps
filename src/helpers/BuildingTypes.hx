@@ -22,7 +22,7 @@ typedef BuildFunctionReturn = {
 typedef BuildingConfig = {
 	buildFunction:(position:Position) -> BuildFunctionReturn,
 	buildIndicator:BuildIndicator,
-	name: String,
+	name:String,
 }
 
 var BuildingsMap:Map<Buildings, BuildingConfig> = [
@@ -49,8 +49,8 @@ var BuildingsMap:Map<Buildings, BuildingConfig> = [
 ];
 
 typedef BuildingInfo = {
-	var building: Object;
-	var name: String;
+	var building:Object;
+	var name:String;
 }
 
 typedef BuildIndicator = {

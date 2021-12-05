@@ -24,10 +24,12 @@ class DroneAnimation extends Animation<DroneAnimations> {
 		animations[DroneAnimations.COMING_IN] = [for (x in 0...5) spritePreProcess(image, x * SPRITE_SIZE, 0, SPRITE_SIZE)];
 		animations[DroneAnimations.COMING_OUT] = [for (x in 0...5) spritePreProcess(image, (5 - x) * SPRITE_SIZE, 0, SPRITE_SIZE)];
 		animations[DroneAnimations.TRAVEL_CARRY] = [
-			for (x in 0...4) spritePreProcess(image, x * SPRITE_SIZE, SPRITE_SIZE, SPRITE_SIZE)
+			for (x in 0...4)
+				spritePreProcess(image, x * SPRITE_SIZE, SPRITE_SIZE, SPRITE_SIZE)
 		];
 		animations[DroneAnimations.TRAVEL_EMPTY] = [
-			for (x in 0...4) spritePreProcess(image, x * SPRITE_SIZE, 2 * SPRITE_SIZE, SPRITE_SIZE)
+			for (x in 0...4)
+				spritePreProcess(image, x * SPRITE_SIZE, 2 * SPRITE_SIZE, SPRITE_SIZE)
 		];
 	}
 }
@@ -48,7 +50,7 @@ class Drone extends Object {
 	var animation:Anim;
 	var action:DroneActions;
 
-	var channel : hxd.snd.Channel;
+	var channel:hxd.snd.Channel;
 
 	var currentOrder:Null<DroneOrder>;
 	var source:Object;
@@ -62,8 +64,7 @@ class Drone extends Object {
 		action = DroneActions.IDLE;
 
 		var flyingSound = hxd.Res.drone.drone_flying;
-		channel = flyingSound.play(true);
-		channel.volume = 0.;
+		channel = flyingSound.play(true, 0.);
 		channel.pause = true;
 
 		animationLoader = new DroneAnimation(DroneAnimation.SPRITE_SIZE);
@@ -86,7 +87,9 @@ class Drone extends Object {
 						animation.play(animationLoader.animations[DroneAnimations.COMING_OUT]);
 						animation.visible = false;
 						animation.pause = true;
-						channel.fadeTo(0., 0.4, () -> {channel.pause = true;});
+						channel.fadeTo(0., 0.4, () -> {
+							channel.pause = true;
+						});
 					}
 				case DroneActions.IDLE:
 					throw new haxe.Exception("Drone: animation ended in IDLE");

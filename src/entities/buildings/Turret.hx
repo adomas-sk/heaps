@@ -29,10 +29,19 @@ class TurretAnimation extends Animation<TurretAnimations> {
 	override public function getAnimations() {
 		var image = hxd.Res.turret.turret.toTile();
 
-		animations[TurretAnimations.IDLE_R] =   [for (x in 0...14) spritePreProcess(image, x * SPRITE_SIZE,           0, SPRITE_SIZE)];
-		animations[TurretAnimations.IDLE_L] =   [for (x in 0...14) spritePreProcess(image, x * SPRITE_SIZE,           0, SPRITE_SIZE, { flipX: true })];
-		animations[TurretAnimations.FIRING_R] = [for (x in 0...5)  spritePreProcess(image, x * SPRITE_SIZE, SPRITE_SIZE, SPRITE_SIZE)];
-		animations[TurretAnimations.FIRING_L] = [for (x in 0...5)  spritePreProcess(image, x * SPRITE_SIZE, SPRITE_SIZE, SPRITE_SIZE, { flipX: true })];
+		animations[TurretAnimations.IDLE_R] = [for (x in 0...14) spritePreProcess(image, x * SPRITE_SIZE, 0, SPRITE_SIZE)];
+		animations[TurretAnimations.IDLE_L] = [
+			for (x in 0...14)
+				spritePreProcess(image, x * SPRITE_SIZE, 0, SPRITE_SIZE, {flipX: true})
+		];
+		animations[TurretAnimations.FIRING_R] = [
+			for (x in 0...5)
+				spritePreProcess(image, x * SPRITE_SIZE, SPRITE_SIZE, SPRITE_SIZE)
+		];
+		animations[TurretAnimations.FIRING_L] = [
+			for (x in 0...5)
+				spritePreProcess(image, x * SPRITE_SIZE, SPRITE_SIZE, SPRITE_SIZE, {flipX: true})
+		];
 	}
 }
 
@@ -48,16 +57,16 @@ class Turret extends Object implements IKillable {
 
 	var animationLoader:Animation<TurretAnimations>;
 	var animation:Anim;
-	var action: TurretActions = TurretActions.IDLE;
+	var action:TurretActions = TurretActions.IDLE;
 	var side:Side = Side.Right;
 
-	var shotSound: hxd.res.Sound;
+	var shotSound:hxd.res.Sound;
 
-	var trackingTarget: Null<IKillable>;
+	var trackingTarget:Null<IKillable>;
 
 	public var health = 10;
 
-	public function new(position: Position) {
+	public function new(position:Position) {
 		super(Main.scene);
 		Main.layers.add(this, LayerIndexes.ON_GROUND);
 		shotSound = Res.turret.shot;
@@ -66,7 +75,7 @@ class Turret extends Object implements IKillable {
 		animation = new Anim(animationLoader.animations[TurretAnimations.IDLE_R], 8, this);
 		animation.onAnimEnd = () -> {
 			if (action == TurretActions.FIRING) {
-				shotSound.play(false, 0.3);
+				shotSound.play(false, 0.2);
 				trackingTarget.onDamage(DAMAGE);
 			}
 		};
@@ -80,38 +89,40 @@ class Turret extends Object implements IKillable {
 
 	public function update(dt) {
 		if (!animation.pause) {
-			switch(action) {
-				case TurretActions.IDLE: {
-					var target = getTarget();
-					if (target != null) {
-						{
-							var target: Dynamic = target;
-							var direction = Helpers.getDirectionToObject(this, target);
-							if (direction.x > 0 && side != Side.Right) {
-								side = Side.Right;
-							} else if (direction.x < 0 && side != Side.Left) {
-								side = Side.Left;
+			switch (action) {
+				case TurretActions.IDLE:
+					{
+						var target = getTarget();
+						if (target != null) {
+							{
+								var target:Dynamic = target;
+								var direction = Helpers.getDirectionToObject(this, target);
+								if (direction.x > 0 && side != Side.Right) {
+									side = Side.Right;
+								} else if (direction.x < 0 && side != Side.Left) {
+									side = Side.Left;
+								}
 							}
+							action = TurretActions.FIRING;
+							animation.play(animationLoader.animations[side == Side.Right ? TurretAnimations.FIRING_R : TurretAnimations.FIRING_L]);
+							trackingTarget = target;
 						}
-						action = TurretActions.FIRING;
-						animation.play(animationLoader.animations[side == Side.Right ? TurretAnimations.FIRING_R : TurretAnimations.FIRING_L]);
-						trackingTarget = target;
 					}
-				}
-				case TurretActions.FIRING: {
-					var distance = Helpers.getDistanceBetweenObjectAndVector(this, trackingTarget.getPosition());
-					if (distance > REACH || trackingTarget.health <= 0) {
-						action = TurretActions.IDLE;
-						animation.play(animationLoader.animations[side == Side.Right ? TurretAnimations.IDLE_R : TurretAnimations.IDLE_L]);
-						trackingTarget = null;
+				case TurretActions.FIRING:
+					{
+						var distance = Helpers.getDistanceBetweenObjectAndVector(this, trackingTarget.getPosition());
+						if (distance > REACH || trackingTarget.health <= 0) {
+							action = TurretActions.IDLE;
+							animation.play(animationLoader.animations[side == Side.Right ? TurretAnimations.IDLE_R : TurretAnimations.IDLE_L]);
+							trackingTarget = null;
+						}
 					}
-				}
 			}
 		}
 	}
 
-	function getTarget(): Null<IKillable> {
-		var target: Dynamic = Killables.getClosestKillable(new Vector(x, y), KillablesTag.ENEMY);
+	function getTarget():Null<IKillable> {
+		var target:Dynamic = Killables.getClosestKillable(new Vector(x, y), KillablesTag.ENEMY);
 		if (target == null) {
 			return null;
 		}
@@ -122,7 +133,6 @@ class Turret extends Object implements IKillable {
 		return target;
 	}
 
-	
 	function onBuild() {
 		animation.alpha = 1;
 		animation.pause = false;
@@ -141,7 +151,7 @@ class Turret extends Object implements IKillable {
 	}
 
 	// TODO: handle damage and death
-	public function onDamage(damage: Int) {
+	public function onDamage(damage:Int) {
 		trace("TURRET GETTING DAMAGED: " + damage);
 	}
 }

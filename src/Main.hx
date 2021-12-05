@@ -2,13 +2,11 @@ import common.Loader;
 import hxd.Window;
 import h2d.Layers;
 import h2d.Bitmap;
-
 import common.Killables;
 import common.OrderHandler;
 import common.DroneScheduler;
 import common.BuildSelector;
 import common.InputManager;
-
 import entities.Drone;
 import entities.Girl;
 
@@ -28,7 +26,7 @@ class Main extends hxd.App {
 	public static var layers:Layers;
 
 	var lastLayerSort = 0.;
-	
+
 	var fpsText:h2d.Text;
 
 	override function init() {

@@ -34,12 +34,12 @@ class EnemyAnimation extends Animation<EnemyAnimations> {
 	override public function getAnimations() {
 		var image = Res.enemy.enemy.toTile();
 		animations[EnemyAnimations.IDLE_L] = [
-			spritePreProcess(image,           0, 0, SPRITE_SIZE),
+			spritePreProcess(image, 0, 0, SPRITE_SIZE),
 			spritePreProcess(image, SPRITE_SIZE, 0, SPRITE_SIZE),
 		];
 		animations[EnemyAnimations.IDLE_R] = [
-			spritePreProcess(image,           0, 0, SPRITE_SIZE, { flipX: true }),
-			spritePreProcess(image, SPRITE_SIZE, 0, SPRITE_SIZE, { flipX: true }),
+			spritePreProcess(image, 0, 0, SPRITE_SIZE, {flipX: true}),
+			spritePreProcess(image, SPRITE_SIZE, 0, SPRITE_SIZE, {flipX: true}),
 		];
 		animations[EnemyAnimations.WALKING_L] = [
 			spritePreProcess(image, 5 * SPRITE_SIZE, 0, SPRITE_SIZE),
@@ -48,22 +48,22 @@ class EnemyAnimation extends Animation<EnemyAnimations> {
 			spritePreProcess(image, 8 * SPRITE_SIZE, 0, SPRITE_SIZE),
 		];
 		animations[EnemyAnimations.WALKING_R] = [
-			spritePreProcess(image, 5 * SPRITE_SIZE, 0, SPRITE_SIZE, { flipX: true }),
-			spritePreProcess(image, 6 * SPRITE_SIZE, 0, SPRITE_SIZE, { flipX: true }),
-			spritePreProcess(image, 7 * SPRITE_SIZE, 0, SPRITE_SIZE, { flipX: true }),
-			spritePreProcess(image, 8 * SPRITE_SIZE, 0, SPRITE_SIZE, { flipX: true }),
+			spritePreProcess(image, 5 * SPRITE_SIZE, 0, SPRITE_SIZE, {flipX: true}),
+			spritePreProcess(image, 6 * SPRITE_SIZE, 0, SPRITE_SIZE, {flipX: true}),
+			spritePreProcess(image, 7 * SPRITE_SIZE, 0, SPRITE_SIZE, {flipX: true}),
+			spritePreProcess(image, 8 * SPRITE_SIZE, 0, SPRITE_SIZE, {flipX: true}),
 		];
 		animations[EnemyAnimations.ATTACKING_L] = [
-			spritePreProcess(image,     SPRITE_SIZE, 0, SPRITE_SIZE),
+			spritePreProcess(image, SPRITE_SIZE, 0, SPRITE_SIZE),
 			spritePreProcess(image, 2 * SPRITE_SIZE, 0, SPRITE_SIZE),
 			spritePreProcess(image, 3 * SPRITE_SIZE, 0, SPRITE_SIZE),
 			spritePreProcess(image, 4 * SPRITE_SIZE, 0, SPRITE_SIZE),
 		];
 		animations[EnemyAnimations.ATTACKING_R] = [
-			spritePreProcess(image,     SPRITE_SIZE, 0, SPRITE_SIZE, { flipX: true }),
-			spritePreProcess(image, 2 * SPRITE_SIZE, 0, SPRITE_SIZE, { flipX: true }),
-			spritePreProcess(image, 3 * SPRITE_SIZE, 0, SPRITE_SIZE, { flipX: true }),
-			spritePreProcess(image, 4 * SPRITE_SIZE, 0, SPRITE_SIZE, { flipX: true }),
+			spritePreProcess(image, SPRITE_SIZE, 0, SPRITE_SIZE, {flipX: true}),
+			spritePreProcess(image, 2 * SPRITE_SIZE, 0, SPRITE_SIZE, {flipX: true}),
+			spritePreProcess(image, 3 * SPRITE_SIZE, 0, SPRITE_SIZE, {flipX: true}),
+			spritePreProcess(image, 4 * SPRITE_SIZE, 0, SPRITE_SIZE, {flipX: true}),
 		];
 	}
 }
@@ -83,10 +83,10 @@ class Enemy extends Object implements IKillable {
 	var following:Null<Object>;
 
 	public var health = 1000;
-	public var healthBar: Health;
+	public var healthBar:Health;
 
-	var spit: hxd.res.Sound;
-	var target: IKillable;
+	var spit:hxd.res.Sound;
+	var target:IKillable;
 
 	public function new(position:Position) {
 		super(Main.scene);
@@ -115,7 +115,7 @@ class Enemy extends Object implements IKillable {
 		switch (action) {
 			case EnemyActions.IDLE:
 				{
-					var target: Dynamic = getTargets();
+					var target:Dynamic = getTargets();
 					if (target != null) {
 						this.target = target;
 						following = target;
@@ -158,7 +158,7 @@ class Enemy extends Object implements IKillable {
 	}
 
 	function getTargets() {
-		var target: Dynamic = Killables.getClosestKillable(new Vector(x, y), KillablesTag.PLAYER);
+		var target:Dynamic = Killables.getClosestKillable(new Vector(x, y), KillablesTag.PLAYER);
 		if (target == null) {
 			return null;
 		}

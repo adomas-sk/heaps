@@ -30,8 +30,8 @@ class OrderHandler {
 		wOffset: 0,
 	};
 
-	static var dropSound: hxd.res.Sound;
-	static var popSound: hxd.res.Sound;
+	static var dropSound:hxd.res.Sound;
+	static var popSound:hxd.res.Sound;
 	static var currentOrderType:Null<DroneOrderTypes> = null;
 
 	static var buildings:Map<String, BuildingInfo> = [];
@@ -67,8 +67,8 @@ class OrderHandler {
 		InputManager.registerEventHandler("order-dump-buildings", InputName.bslash, (repeat:Bool) -> {
 			trace("ALL BUILDING ----");
 
-			var dump: Map<String, { x:Float, y:Float }> = [];
-			var intemediateDump: Map<String, Array<String>> = [];
+			var dump:Map<String, {x:Float, y:Float}> = [];
+			var intemediateDump:Map<String, Array<String>> = [];
 			var foundBuildings = [];
 			var count = 0;
 			for (key in buildings.keys()) {
@@ -92,7 +92,7 @@ class OrderHandler {
 							var locationY = Std.parseInt(locations.split(":")[1]);
 							y = locationY < y ? locationY : y;
 						}
-						dump[id] = { x:x, y:y };
+						dump[id] = {x: x, y: y};
 					}
 				}
 			}
@@ -128,7 +128,7 @@ class OrderHandler {
 	}
 
 	// TODO: copy pasted code with minor changes. Refactor
-	public static function instantDeliveryOrder(cell: Cell, name: String, buildSize: BuildIndicator, buildFunction:(position:Position) -> BuildFunctionReturn) {
+	public static function instantDeliveryOrder(cell:Cell, name:String, buildSize:BuildIndicator, buildFunction:(position:Position) -> BuildFunctionReturn) {
 		var buildSpace = {x: cell.x * BLOCK_SIZE, y: cell.y * BLOCK_SIZE};
 		var newBuildingX = buildSpace.x + buildSize.w / 2;
 		var newBuildingY = buildSpace.y + buildSize.h / 2;
@@ -214,8 +214,8 @@ class OrderHandler {
 			WorldGrid.removeStaticObject(building, {h: buildIndicatorInfo.h, w: buildIndicatorInfo.w});
 		};
 	}
-	
-	static function getCell(x: Float, y: Float, ?withOffset:Bool) {
+
+	static function getCell(x:Float, y:Float, ?withOffset:Bool) {
 		return {
 			x: Math.floor((x - (withOffset ? buildIndicatorInfo.wOffset : 0)) / BLOCK_SIZE),
 			y: Math.floor((y - (withOffset ? buildIndicatorInfo.hOffset : 0)) / BLOCK_SIZE)
@@ -226,7 +226,7 @@ class OrderHandler {
 		return getCell(Main.scene.mouseX, Main.scene.mouseY, withOffset);
 	}
 
-	static function addBuildings(cell:Cell, building:Object, name: String) {
+	static function addBuildings(cell:Cell, building:Object, name:String) {
 		var cols = Math.round(buildIndicatorInfo.w / BLOCK_SIZE);
 		var rows = Math.round(buildIndicatorInfo.h / BLOCK_SIZE);
 

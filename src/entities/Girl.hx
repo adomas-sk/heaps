@@ -28,19 +28,24 @@ class GirlAnimation extends Animation<GirlAnimations> {
 
 		animations[GirlAnimations.IDLE_R] = [for (x in 0...4) spritePreProcess(girlImage, x * SPRITE_SIZE, 0, SPRITE_SIZE)];
 		animations[GirlAnimations.IDLE_L] = [
-			for (x in 0...4) spritePreProcess(girlImage, x * SPRITE_SIZE, SPRITE_SIZE, SPRITE_SIZE)
+			for (x in 0...4)
+				spritePreProcess(girlImage, x * SPRITE_SIZE, SPRITE_SIZE, SPRITE_SIZE)
 		];
 		animations[GirlAnimations.CONTROL_R] = [
-			for (x in 0...3) spritePreProcess(girlImage, x * SPRITE_SIZE, 2 * SPRITE_SIZE, SPRITE_SIZE)
+			for (x in 0...3)
+				spritePreProcess(girlImage, x * SPRITE_SIZE, 2 * SPRITE_SIZE, SPRITE_SIZE)
 		];
 		animations[GirlAnimations.CONTROL_L] = [
-			for (x in 0...3) spritePreProcess(girlImage, x * SPRITE_SIZE, 3 * SPRITE_SIZE, SPRITE_SIZE)
+			for (x in 0...3)
+				spritePreProcess(girlImage, x * SPRITE_SIZE, 3 * SPRITE_SIZE, SPRITE_SIZE)
 		];
 		animations[GirlAnimations.WALK_R] = [
-			for (x in 0...8) spritePreProcess(girlImage, x * SPRITE_SIZE, 4 * SPRITE_SIZE, SPRITE_SIZE)
+			for (x in 0...8)
+				spritePreProcess(girlImage, x * SPRITE_SIZE, 4 * SPRITE_SIZE, SPRITE_SIZE)
 		];
 		animations[GirlAnimations.WALK_L] = [
-			for (x in 0...8) spritePreProcess(girlImage, x * SPRITE_SIZE, 5 * SPRITE_SIZE, SPRITE_SIZE)
+			for (x in 0...8)
+				spritePreProcess(girlImage, x * SPRITE_SIZE, 5 * SPRITE_SIZE, SPRITE_SIZE)
 		];
 	}
 }
@@ -55,10 +60,11 @@ class Girl extends Object implements IKillable {
 	var velocity = {x: 0., y: 0.};
 	var lookingRight = false;
 	var controlling = 0;
-	var steps: hxd.snd.Channel;
+	var steps:hxd.snd.Channel;
 
 	public var health = 200;
-	var healthBar: Health;
+
+	var healthBar:Health;
 
 	public function new(x:Float, y:Float) {
 		super(Main.scene);
@@ -69,7 +75,7 @@ class Girl extends Object implements IKillable {
 		animationLoader = new GirlAnimation(GirlAnimation.SPRITE_SIZE);
 		animation = new Anim(animationLoader.animations[GirlAnimations.IDLE_L], 8, this);
 		// new h2d.Bitmap(h2d.Tile.fromColor(0xff4589, 4, 4, 1), animation);
-		healthBar = new Health(this, { x: 16, y: -32 });
+		healthBar = new Health(this, {x: 16, y: -32});
 
 		registerInput();
 		Killables.registerKillable(this, KillablesTag.PLAYER);
@@ -176,7 +182,7 @@ class Girl extends Object implements IKillable {
 		});
 	}
 
-	public function onDamage(damage: Int) {
+	public function onDamage(damage:Int) {
 		health -= damage;
 		healthBar.setHealth(health / MAX_HEALTH);
 		if (health <= 0) {
@@ -184,6 +190,7 @@ class Girl extends Object implements IKillable {
 			onDeath();
 		}
 	}
+
 	function onDeath() {
 		trace("Girl got ded");
 		Killables.announceDead(this);
