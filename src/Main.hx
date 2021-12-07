@@ -1,3 +1,4 @@
+import entities.environment.Grass;
 import common.Loader;
 import hxd.Window;
 import h2d.Layers;
@@ -24,13 +25,14 @@ class Main extends hxd.App {
 	public static var scene:h2d.Scene;
 	public static var girl:Girl;
 	public static var layers:Layers;
+	var grass: Grass;
 
 	var lastLayerSort = 0.;
 
 	var fpsText:h2d.Text;
 
 	override function init() {
-		// Window.getInstance().vsync = false;
+		Window.getInstance().vsync = false;
 		Window.getInstance().addEventTarget(InputManager.onEvent);
 		Window.getInstance().addResizeEvent(resizeHandler);
 		scene = s2d;
@@ -43,6 +45,8 @@ class Main extends hxd.App {
 		grass.x -= 10000 / 2;
 		grass.y -= 10000 / 2;
 		layers.add(grass, LayerIndexes.GROUND);
+
+		this.grass = new Grass();
 
 		// TREE
 		// var tree = new Tree({x: 128, y: 128});
@@ -87,6 +91,7 @@ class Main extends hxd.App {
 			layers.ysort(LayerIndexes.ON_GROUND);
 			lastLayerSort = 0;
 		}
+		grass.update(dt);
 
 		// TODO: Add centralised update manager
 		DroneScheduler.updateDrones(dt);

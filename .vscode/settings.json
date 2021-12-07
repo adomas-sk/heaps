@@ -1,4 +1,5 @@
 {
   "editor.defaultFormatter": "nadako.vshaxe",
-  "editor.insertSpaces": false
+  "editor.insertSpaces": false,
+  "editor.tabSize": 2
 }

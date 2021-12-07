@@ -34,7 +34,6 @@ class Loader {
 					break;
 				}
 			}
-			trace(buildSize);
 			if (buildSize != null && buildFunction != null) {
 				OrderHandler.instantDeliveryOrder(cell, name, buildSize, buildFunction);
 			}

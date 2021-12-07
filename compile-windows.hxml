@@ -1,0 +1,9 @@
+-cp src
+-lib heaps
+-lib domkit
+-lib hldx
+-lib json2object
+-hl build/main.hl
+# -js bin/game.js
+-main Main
+-debug
