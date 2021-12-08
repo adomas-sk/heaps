@@ -36,17 +36,16 @@ class Main extends hxd.App {
 		Window.getInstance().addEventTarget(InputManager.onEvent);
 		Window.getInstance().addResizeEvent(resizeHandler);
 		scene = s2d;
-
+		
+		this.grass = new Grass();
 		// LAYERS
 		layers = new Layers(s2d);
 
 		// GRASS
-		var grass = new h2d.Bitmap(h2d.Tile.fromColor(0xa7da48, 10000, 10000, 0.3), Main.scene);
+		var grass = new h2d.Bitmap(h2d.Tile.fromColor(0x96C43E, 10000, 10000, 0.3), Main.scene);
 		grass.x -= 10000 / 2;
 		grass.y -= 10000 / 2;
 		layers.add(grass, LayerIndexes.GROUND);
-
-		this.grass = new Grass();
 
 		// TREE
 		// var tree = new Tree({x: 128, y: 128});
